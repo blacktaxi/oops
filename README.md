@@ -1,9 +1,16 @@
 oops
 ====
 
-Simple OOP with classes for Lua
+Simple OOP with classes for Lua.
 
-TODO:
+Features
+--------
+- Succinct syntax
+- Inheritance
+- Controlled class visibility scope (can define local/anonymous classes)
+
+TODO
+----
 - rockspec
 - tests
 - comment/docstring conventions
