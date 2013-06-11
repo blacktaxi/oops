@@ -1,12 +1,14 @@
---
--- Created by IntelliJ IDEA.
--- User: eis
--- Date: 06/07/12
--- Time: 14:12
--- To change this template use File | Settings | File Templates.
---
+--- Oops is a class-based inheritance OOP library for Lua with controlled 
+-- class scope (local and anonymous classes) and succinct syntax.
+-- @release 0.1
+-- @class module
+-- @module 'oops'
+-- @author Sergey Yavnyi
 
--- creates a class table which has a "new" method to create object instances.
+--- Creates a class table.
+-- @param name Class name.
+-- @param parentclass Parent class. Optional.
+-- @param classef Class definition table.
 local new_class = function (name, parentclass, classdef)
   print("defining class "..name.." with parent "..tostring(parentclass).." and def "..tostring(classdef))
 
@@ -16,7 +18,7 @@ local new_class = function (name, parentclass, classdef)
     -- "inherit" class definition from parent class
     __classdef__ = setmetatable(classdef, {__index = parentclass.__classdef__}),
 
-    -- instance constructor
+    --- Instance constructor.
     create = function(cls)
       print(cls.__name__..":create()", cls.__parent__)
       
@@ -62,10 +64,9 @@ local new_class = function (name, parentclass, classdef)
   return cls
 end
 
--- the root class. TODO this is probably redundant,
--- can optimize object creation by removing a call
--- to root_class:create() and instead move this code
--- in the new_class function.
+--- The root class. TODO this is probably redundant, can optimize object 
+-- creation by removing a call to root_class:create() and instead move this 
+-- code in the new_class function.
 local root_class = {
   __classdef__ = {},
   __parent__ = nil,
@@ -81,9 +82,8 @@ local root_class = {
   end
 }
 
--- a curried form of new_class call.
--- the calling convention is:
--- X = class("Name")(ParentClass) { <classdef>... }
+--- Defines a new class.
+-- @usage Name = class("Name")(ParentClass) { <classdef>... }
 class = function(name)
   return function(parent)
     return function(classdef)
@@ -96,7 +96,7 @@ class = function(name)
   end
 end
 
--- a function to use as an abstract method definition
+--- Abstract method placeholder.
 abstract_method = function(self, ...)
   error("Abstract method call: inst of "..self.__class__.__name__.." with args", ...)
 end
