@@ -15,6 +15,6 @@ before_install:
 
 install:
   - sudo luarocks install telescope
-  - sudo luarocks make oops.rockspec
+  - sudo luarocks make oops-scm-0.rockspec
 
 script: "tsc -f test/*.lua"
