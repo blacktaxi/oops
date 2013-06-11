@@ -47,8 +47,7 @@ local new_class = function (name, parentclass, classdef)
       return instance
     end,
 
-    -- convenience constructor that also calls the init 
-    -- method
+    --- Convenience constructor that also calls the init method.
     new = function(cls, ...)
       local i = cls:create()
 
