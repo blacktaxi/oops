@@ -10,7 +10,7 @@
 -- @param parentclass Parent class. Optional.
 -- @param classef Class definition table.
 local new_class = function (name, parentclass, classdef)
-  print("defining class "..name.." with parent "..tostring(parentclass).." and def "..tostring(classdef))
+  -- print("defining class "..name.." with parent "..tostring(parentclass).." and def "..tostring(classdef))
 
   local cls = {
     __parent__ = parentclass,
@@ -20,7 +20,7 @@ local new_class = function (name, parentclass, classdef)
 
     --- Instance constructor.
     create = function(cls)
-      print(cls.__name__..":create()", cls.__parent__)
+      -- print(cls.__name__..":create()", cls.__parent__)
       
       -- call superclass constructor
       local super = cls.__parent__:create()
@@ -73,7 +73,7 @@ local root_class = {
   __name__ = "<root>",
 
   create = function(cls)
-    print(cls.__name__..":create()")
+    -- print(cls.__name__..":create()")
 
     return {
       __class__ = cls,
