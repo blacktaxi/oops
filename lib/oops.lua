@@ -52,8 +52,8 @@ local new_class = function (name, parentclass, classdef)
       local i = cls:create()
 
       -- call init method, if any
-      if i.init then
-        i:init(...)
+      if i.__init__ then
+        i:__init__(...)
       end
 
       return i
