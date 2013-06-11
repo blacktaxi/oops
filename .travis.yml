@@ -1,20 +1,20 @@
 language: erlang
 
 env:
-    matrix:
-        - LUA=lua5.1
-        - LUA=luajit
+  matrix:
+    - LUA=lua5.1
+    - LUA=luajit
 
 branches:
-    only:
-        - master
+  only:
+    - master
 
 before_install:
-    - sudo apt-get install $LUA
-    - sudo apt-get install luarocks
+  - sudo apt-get install $LUA
+  - sudo apt-get install luarocks
 
 install:
-    - sudo luarocks install telescope
-    - sudo luarocks make oops.rockspec
+  - sudo luarocks install telescope
+  - sudo luarocks make oops.rockspec
 
 script: "tsc -f test/*.lua"
