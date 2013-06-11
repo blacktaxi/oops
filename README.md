@@ -11,7 +11,4 @@ Features
 
 TODO
 ----
-- rockspec
-- tests
-- comment/docstring conventions
 - usage examples
