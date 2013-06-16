@@ -7,7 +7,7 @@ Simple OOP with class-based inheritance, anonymous classes and comfortable synta
 
 Examples
 --------
-```
+```lua
 require 'oops'
 
 -- Simplest class. No methods, no constructor, no inheritance.
