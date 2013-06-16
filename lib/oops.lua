@@ -89,19 +89,26 @@ local new_class = function (name, parentclass, classdef)
 end
 
 --- Defines a new class.
--- @usage Class = class("Class") { <classdef>... }
--- @usage Class = class("Class", ParentClass) { <classdef>... }
 -- @usage anon_class = class { <classdef>... }
+-- @usage Class = class("Class") { <classdef>... }
+-- @usage anon_class = class(ParentClass) { <classdef>... }
 -- @usage anon_class = class(nil, ParentClass) { <classdef>... }
+-- @usage Class = class("Class", ParentClass) { <classdef>... }
 class = function(...)
   local arg_count = select('#', ...)
   if arg_count == 1 then
+    -- class(ParentClass) { ... }
     -- class("Name") { ... }
     -- class(nil) { ... }
     -- class { ... }
     local a = ...
 
-    if type(a) == 'table' and (not isclass(a)) then
+    if (isclass(a)) then
+      -- class(ParentClass) { ... }
+      return function (classdef)
+        return new_class(nil, a, classdef)
+      end
+    elseif type(a) == 'table' then
       -- class { ... }
       return new_class(nil, nil, a)
     elseif type(a) == 'string' or type(a) == nil then

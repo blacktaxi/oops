@@ -34,10 +34,17 @@ context('base class functionality', function ()
   test('anonymous class can have a parent', function ()
     local C1 = class {}
     local C2 = class(nil, C1) {}
-    local o = C2()
+
+    local o2 = C2()
     assert_true(isclass(C2))
-    assert_true(isobject(o))
-    assert_equal(C2, o.__class)
+    assert_true(isobject(o2))
+    assert_equal(o2.__class, C2)
+
+    local C3 = class(C1) {}
+    local o3 = C3()
+    assert_true(isclass(C3))
+    assert_true(isobject(o3))
+    assert_equal(o3.__class, C3)
   end)
 
   test('__init method should be called', function ()
