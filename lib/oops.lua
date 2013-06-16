@@ -137,7 +137,7 @@ end
 
 --- Abstract method placeholder.
 abstract_method = function(self, ...)
-  error('Abstract method call: inst of ' ..self.__class__.__name__.. ' with args', ...)
+  error('Abstract method call: inst of ' .. self.__class.__name .. ' with args', ...)
 end
 
 return {
