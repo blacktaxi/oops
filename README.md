@@ -3,9 +3,56 @@ Oops
 
 [![Build Status](https://travis-ci.org/blacktaxi/oops.png?branch=master)](https://travis-ci.org/blacktaxi/oops)
 
-Simple OOP with class-based inheritance, anonymous classes and comfortable syntax for Lua.
+Simple OOP with class-based inheritance, anonymous classes (classes are first-class values) and comfortable syntax for Lua.
 
-Examples
+Example
+-------
+```lua
+require 'oops'
+
+-- Class declaration.
+local A = class {
+  -- Constructor. Called upon creation of an instance.
+  __init = function (self, x)
+    self.x = x
+  end,
+
+  -- Method.
+  method = function (self, z)
+    return self.x + self.z
+  end
+}
+
+-- Inheritance.
+local B = class(A) {
+  -- Overriding superclass' method.
+  method = function (self, v)
+    -- Calling superclass' method.
+    local u = self.__super:method(v)
+    return u * 2
+  end
+}
+
+local f = function (x, y)
+  -- Class instantiation.
+  local o = y()
+
+  return x - y.bar + y:foo(x)
+end
+
+local z = f(
+  5, 
+  -- Anonymous class.
+  class {
+    bar = 1,
+
+    foo = function (self, x)
+      return x * 3
+    end
+  })
+```
+
+A more elaborate example
 --------
 ```lua
 require 'oops'
@@ -55,7 +102,7 @@ local Journalist = class(TalkingHuman) {
   end
 }
 
--- array of objects
+-- Array of objects.
 local people = { 
   Scientist('John von Neumann', 
     'a von Neumann algebra or W*-algebra is a *-algebra of bounded' .. 
@@ -72,21 +119,15 @@ local people = {
 }
 
 local interview = function (who)
-  -- dynamic dispatch
+  -- Dynamic dispatch.
   print(who.name .. ' says: ' .. who:talk())
 end
 
--- interview them all.
+-- Polymorphism.
 for _, v in pairs(people) do
   interview(v)
 end
 ```
-
-Features
---------
-- Succinct syntax
-- Inheritance
-- Controlled class visibility scope (can define local/anonymous classes)
 
 To do
 ----
