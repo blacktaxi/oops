@@ -5,6 +5,12 @@ Oops
 
 Simple OOP with class-based inheritance, anonymous classes (classes are first-class values) and comfortable syntax for Lua.
 
+Features
+--------
+* Class-based inheritance: class is a factory for objects (instances).
+* Controlled visibility scope: classes don't have to be global, classes can be anonymous (defined and used at the spot).
+* Terse syntax: ```class { hello = function (self) print('world!') end }```
+
 Example
 -------
 ```lua
