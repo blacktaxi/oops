@@ -13,20 +13,6 @@ isobject = function (x)
   return type(x) == 'table' and isclass(x.__class)
 end
 
---- The root class. All classes inherit from the root class.
-local root_class = {
-  __classdef = {},
-  __parent = nil,
-  __name = "<root>",
-
-  __create = function(cls)
-    return {
-      __class = cls,
-      __super = nil
-    }
-  end
-}
-
 --- Creates a class table.
 -- @param name Class name.
 -- @param parentclass Parent class. Optional.
@@ -39,18 +25,19 @@ local new_class = function (name, parentclass, classdef)
     and (type(classdef) == 'nil' or type(classdef) == 'table')
   )
 
-  local parentclass = parentclass or root_class
   local classdef = classdef or {}
 
   local cls = {
     __parent = parentclass,
     -- "inherit" class definition from parent class
-    __classdef = setmetatable(classdef, { __index = parentclass.__classdef }),
+    __classdef = 
+      parentclass and setmetatable(classdef, { __index = parentclass.__classdef })
+      or classdef,
 
     --- Instance constructor.
     __create = function(cls)
       -- call superclass constructor
-      local super = cls.__parent:__create()
+      local super = parentclass and cls.__parent:__create() or nil
 
       -- create instance object and initialize it with
       -- class-defined attributes
@@ -64,9 +51,7 @@ local new_class = function (name, parentclass, classdef)
 
       -- attributes not present in this instance will be
       -- indexed from parent class instance
-      setmetatable(instance, { __index = super })
-
-      return instance
+      return super and setmetatable(instance, { __index = super }) or instance
     end,
   }
 
