@@ -15,7 +15,8 @@ description = {
 dependencies = {
    "lua >= 5.1",
    "inspect",
-   "moses"
+   "moses",
+   "telescope"
 }
 
 build = {
