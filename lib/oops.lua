@@ -13,6 +13,11 @@ isobject = function (x)
   return type(x) == 'table' and isclass(x.__class)
 end
 
+isinstanceof = function (x, cls)
+  return isobject(x) and isclass(cls) and (x.__class == cls or 
+    (x.__super and isinstanceof(x.__super, cls)))
+end
+
 --- Creates a class table.
 -- @param name Class name.
 -- @param parentclass Parent class. Optional.
@@ -129,5 +134,6 @@ return {
   class = class,
   isclass = isclass,
   isobject = isobject,
+  isinstanceof = isinstanceof,
   abstract_method = abstract_method
 }
