@@ -65,11 +65,34 @@ local benchmarks = {
       o:z()
     end
   end},
-  { name = 'Instance test', action = function ()
-    local C2 = class { x = 5, y = 6, z = function (self) return 9 end }
-    local o = C2()
+  { name = 'Is-class test', action = function ()
+    local C = class { }
     return function ()
-      isinstanceof(o, C2)
+      isclass(C)
+    end
+  end},
+  { name = 'Is-object test', action = function ()
+    local C = class { }
+    local o = C()
+    return function ()
+      isobject(o)
+    end
+  end},
+  { name = 'Is-instance-of test', action = function ()
+    local C = class { }
+    local o = C()
+    return function ()
+      isinstanceof(o, C)
+    end
+  end},
+  { name = '3-inheritance is-instance-of test', action = function ()
+    local C = class { }
+    local C1 = class(C) { }
+    local C2 = class(C1) { }
+    local C3 = class(C2) { }
+    local o = C3()
+    return function ()
+      isinstanceof(o, C)
     end
   end},
 }
