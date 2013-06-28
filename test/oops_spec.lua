@@ -88,6 +88,9 @@ context('base class functionality', function ()
 end)
 
 context('inheritance and dispatch', function ()
+  test('inheriting from not a class value should yield an error', function ()
+    assert_true(false) -- FIXME
+  end)
   test('methods should be inherited', function ()
     local method_called = false
 
