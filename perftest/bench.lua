@@ -19,15 +19,16 @@ function bench(benchmark)
   print('Timing ' .. benchmark.name .. '...')
 
   local min_iterations = benchmark.iterations or 500000
-  local repeats = 5
-
   local action = benchmark.action()
 
+  -- a function that times an action 'properly'
   local proper_time = function (action, min_time)
+    -- minimal benchmark time
     local min_time = min_time or 1.0
     local total_time = 0.0
     local total_iterations = 0
     collectgarbage()
+    -- iterate until total time is >= minimal time
     repeat
       total_time = total_time + time(function ()
         for _ = 0, min_iterations do
@@ -40,12 +41,14 @@ function bench(benchmark)
     return total_time / total_iterations
   end
 
-  local empty_tpi = proper_time(function () end)
-  local bench_tpi = proper_time(action)
+  -- measure overhead
+  local overhead_tpi = proper_time(function () end)
+  -- measure actual benchmark
+  local full_tpi = proper_time(action)
 
   print('Finished.')
 
-  return { benchmark, 1 / (bench_tpi - empty_tpi) }
+  return { benchmark, 1 / (full_tpi - overhead_tpi) }
 end
 
 return {
