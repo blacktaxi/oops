@@ -28,14 +28,14 @@ local benchmarks = {
       local o = C1()
     end
   end},
-  { name = '1-level inheritance instance creation', action = function ()
+  { name = '1-inheritance instance creation', action = function ()
     local C2 = class { }
     local C3 = class(C2) { }
     return function ()
       local o = C3()
     end
   end},
-  { name = '3-level inheritance instance creation', action = function ()
+  { name = '3-inheritance instance creation', action = function ()
     local C2 = class { }
     local C3 = class(C2) { }
     local C4 = class(C3) { }
@@ -57,7 +57,7 @@ local benchmarks = {
       o:z()
     end
   end},
-  { name = '1-level inherited instance method call', action = function ()
+  { name = '1-inheritance instance method call', action = function ()
     local C1 = class { x = 5, y = 6, z = function (self) return 9 end }
     local C2 = class(C1) { q = function (self) return 10 end }
     local o = C2()
