@@ -18,7 +18,7 @@ end
 function bench(benchmark)
   print('Timing ' .. benchmark.name .. '...')
 
-  local min_iterations = benchmark.iterations or 500000
+  local min_iterations = benchmark.iterations or 100000
   local action = benchmark.action()
 
   -- a function that times an action 'properly'

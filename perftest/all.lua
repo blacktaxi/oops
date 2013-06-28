@@ -18,6 +18,7 @@ local benchmarks = {
     local C = class { }
     C = class(C) { }
     C = class(C) { }
+    C = class(C) { }
     return function ()
       local C1 = class(C) { }
     end
