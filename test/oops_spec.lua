@@ -89,8 +89,12 @@ end)
 
 context('inheritance and dispatch', function ()
   test('inheriting from not a class value should yield an error', function ()
-    assert_true(false) -- FIXME
+    assert_error(function ()
+      local x = 5
+      local C = class(x) { }
+    end)
   end)
+
   test('methods should be inherited', function ()
     local method_called = false
 
