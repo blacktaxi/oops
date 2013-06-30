@@ -61,7 +61,7 @@ local new_class = function (name, parentclass, classdef)
   }
 
   -- Assign class name.
-  cls.__name = name or ('<class@' .. tostring(cls) .. '>')
+  cls.__name = name or ('anon@' .. tostring(cls))
 
   return setmetatable(cls, {
     --- User constructor.
@@ -74,6 +74,10 @@ local new_class = function (name, parentclass, classdef)
       end
 
       return i
+    end,
+
+    __tostring = function()
+      return '<class: ' .. cls.__name .. '>'
     end
   })
 end
@@ -127,7 +131,7 @@ end
 
 --- Abstract method placeholder.
 abstract_method = function(self, ...)
-  error('Abstract method call: inst of ' .. self.__class.__name .. ' with args', ...)
+  error('Abstract method call: inst of ' .. self.__class .. ' with args', ...)
 end
 
 return {
