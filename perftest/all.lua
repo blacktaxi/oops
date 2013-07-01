@@ -107,8 +107,8 @@ local benchmarks = {
 
 local print_results = function (results)
   for _, r in ipairs(results) do
-    b, ips = unpack(r)
-    print(b.name .. ': ' .. ips  .. ' ips')
+    b, t = unpack(r)
+    print(b.name .. ': ' .. t * 1000000  .. ' us')
   end
 end
 

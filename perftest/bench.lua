@@ -48,7 +48,7 @@ function bench(benchmark)
 
   print('Finished.')
 
-  return { benchmark, 1 / (full_tpi - overhead_tpi) }
+  return { benchmark, full_tpi - overhead_tpi }
 end
 
 return {
