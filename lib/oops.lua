@@ -54,9 +54,15 @@ local new_class = function (name, parentclass, classdef)
       instance.__super = super
       instance.__class = cls
 
+      local instanceid = tostring(instance)
+      local tostringfn = function ()
+        return '<object of ' .. tostring(cls) .. ': ' .. instanceid .. '>'
+      end
+
       -- attributes not present in this instance will be
       -- indexed from parent class instance
-      return super and setmetatable(instance, { __index = super }) or instance
+      return super and setmetatable(instance, { __index = super, __tostring = tostringfn })
+             or setmetatable(instance, { __tostring = tostringfn })
     end,
   }
 
