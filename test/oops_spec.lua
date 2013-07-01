@@ -85,6 +85,19 @@ context('base class functionality', function ()
     o:effectful_method()
     assert_equal('new', o.state)
   end)
+
+  test('class\' tostring method works', function ()
+    local C = class { }
+    local x = tostring(C)
+    assert_equal(x:sub(1, 7), '<class:')
+  end)
+
+  test('object\'s tostring method works', function ()
+    local C = class { }
+    local o = C()
+    local x = tostring(o)
+    assert_equal(x:sub(1, 10), '<object of')
+  end)
 end)
 
 context('inheritance and dispatch', function ()
