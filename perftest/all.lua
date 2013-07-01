@@ -66,6 +66,13 @@ local benchmarks = {
       o:z()
     end
   end},
+  { name = 'Instance mutation via method call', action = function ()
+    local C = class { x = 0, method = function (self) self.x = self.x + 1 end }
+    local o = C()
+    return function ()
+      o:method()
+    end
+  end},
   { name = 'Is-class test', action = function ()
     local C = class { }
     return function ()
