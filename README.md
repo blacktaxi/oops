@@ -5,6 +5,11 @@ Oops
 
 Simple OOP with class-based inheritance, anonymous classes (classes are first-class values) and comfortable syntax for Lua.
 
+Why?
+----
+* Existing OOP libraries for Lua either have too verbose syntax (can't define a class in a single expression) and/or are too packed with features I don't need
+* I was bored, Not-Invented-Here, etc
+
 Features
 --------
 * Class-based inheritance: class is a factory for objects (instances).
