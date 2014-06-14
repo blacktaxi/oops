@@ -25,7 +25,7 @@ before_install:
   - cd $TRAVIS_BUILD_DIR
 
 install:
-  - sudo luarocks install telescope
-  - sudo luarocks make oops-scm-0.rockspec
+  - sudo -E luarocks install telescope
+  - sudo -E luarocks make oops-scm-0.rockspec
 
 script: "tsc -f test/*.lua"
