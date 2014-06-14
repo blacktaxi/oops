@@ -3,68 +3,18 @@ Oops
 
 [![Build Status](https://travis-ci.org/blacktaxi/oops.png?branch=master)](https://travis-ci.org/blacktaxi/oops)
 
-Simple OOP with class-based inheritance, anonymous classes (classes are first-class values) and comfortable syntax for Lua.
-
-Why?
-----
-* Existing OOP libraries for Lua either have too verbose syntax (can't define a class in a single expression) and/or are too packed with features I don't need
-* I was bored, Not-Invented-Here, etc
+Simple [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP for Lua with first
+class classes (class definition is an expression) and comfortable syntax.
 
 Features
 --------
 * Class-based inheritance: class is a factory for objects (instances).
-* Controlled visibility scope: classes don't have to be global, classes can be anonymous (defined and used at the spot).
-* Terse syntax: ```class { hello = function (self) print('world!') end }```
+* Classes as expressions (classes can be anonymous and/or defined and used on the spot).
+* Controlled visibility scope: classes don't have to be global.
+* Terse syntax: ```class { hello = function (self) print('world!') end }```.
 
 Example
 -------
-```lua
-require 'oops'
-
--- Class declaration.
-local A = class {
-  -- Constructor. Called upon creation of an instance.
-  __init = function (self, x)
-    self.x = x
-  end,
-
-  -- Method.
-  method = function (self, z)
-    return self.x + self.z
-  end
-}
-
--- Inheritance.
-local B = class(A) {
-  -- Overriding superclass' method.
-  method = function (self, v)
-    -- Calling superclass' method.
-    local u = self.__super:method(v)
-    return u * 2
-  end
-}
-
-local f = function (x, y)
-  -- Class instantiation.
-  local o = y()
-
-  return x - y.bar + y:foo(x)
-end
-
-local z = f(
-  5, 
-  -- Anonymous class.
-  class {
-    bar = 1,
-
-    foo = function (self, x)
-      return x * 3
-    end
-  })
-```
-
-A more elaborate example
---------
 ```lua
 require 'oops'
 
@@ -140,8 +90,16 @@ for _, v in pairs(people) do
 end
 ```
 
+```
+$ lua people.lua
+John von Neumann says: It is a scientific fact that a von Neumann algebra or W*-algebra is a *-algebra of bounded operators on a Hilbert space that is closed in the weak operator topology and contains the identity operator..
+Victor Tsoi says: Mmmrhrhgmhmmm...
+Michael Moore says: According to Emmanuel Goldstein, "2 + 2 = 5."
+```
+
 To do
-----
+-----
 - write proper docstrings
+- support for class methods/values; support for custom metamethods
 - write more tests
 - compare with other OOP libraries
