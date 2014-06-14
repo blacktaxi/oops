@@ -1,4 +1,4 @@
---- Oops is a class-based inheritance OOP library for Lua with controlled 
+--- Oops is a class-based OOP library for Lua with controlled 
 -- class scope (local and anonymous classes) and succinct syntax.
 -- @release 0.1
 -- @class module
@@ -135,15 +135,9 @@ class = function(...)
   end
 end
 
---- Abstract method placeholder.
-abstract_method = function(self, ...)
-  error('Abstract method call: inst of ' .. self.__class .. ' with args', ...)
-end
-
 return {
   class = class,
   isclass = isclass,
   isobject = isobject,
   isinstanceof = isinstanceof,
-  abstract_method = abstract_method
 }
