@@ -1,4 +1,4 @@
-require 'oops'
+class = require 'oops'
 local _ = require 'moses'
 require 'bench'
 
@@ -76,21 +76,21 @@ local benchmarks = {
   { name = 'Is-class test', action = function ()
     local C = class { }
     return function ()
-      isclass(C)
+      class.isclass(C)
     end
   end},
   { name = 'Is-object test', action = function ()
     local C = class { }
     local o = C()
     return function ()
-      isobject(o)
+      class.isobject(o)
     end
   end},
   { name = 'Is-instance-of test', action = function ()
     local C = class { }
     local o = C()
     return function ()
-      isinstanceof(o, C)
+      class.isinstanceof(o, C)
     end
   end},
   { name = '3-inheritance is-instance-of test', action = function ()
@@ -100,7 +100,7 @@ local benchmarks = {
     local C3 = class(C2) { }
     local o = C3()
     return function ()
-      isinstanceof(o, C)
+      class.isinstanceof(o, C)
     end
   end},
 }

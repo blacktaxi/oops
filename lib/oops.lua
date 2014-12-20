@@ -5,15 +5,15 @@
 -- @module 'oops'
 -- @author Sergey Yavnyi
 
-isclass = function (x)
+local isclass = function (x)
   return type(x) == 'table' and type(x.__classdef) == 'table'
 end
 
-isobject = function (x)
+local isobject = function (x)
   return type(x) == 'table' and isclass(x.__class)
 end
 
-isinstanceof = function (x, cls)
+local function isinstanceof(x, cls)
   return isobject(x) and isclass(cls) and (x.__class == cls or 
     (x.__super and isinstanceof(x.__super, cls)))
 end
@@ -94,7 +94,7 @@ end
 -- @usage anon_class = class(ParentClass) { <classdef>... }
 -- @usage anon_class = class(nil, ParentClass) { <classdef>... }
 -- @usage Class = class("Class", ParentClass) { <classdef>... }
-class = function(...)
+local class = function(...)
   local arg_count = select('#', ...)
   if arg_count == 1 then
     -- class(ParentClass) { ... }
@@ -135,9 +135,9 @@ class = function(...)
   end
 end
 
-return {
+return setmetatable({
   class = class,
   isclass = isclass,
   isobject = isobject,
   isinstanceof = isinstanceof,
-}
+}, { __call = function(_, ...) return class(...) end })
