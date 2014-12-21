@@ -12,8 +12,8 @@ local Duck = class {
   end,
 
   quack = function (self)
-    print("Quack!")
     self.quacks = self.quacks + 1
+    print('Quack! Total: ' .. self.quacks .. ' time(s).')
   end,
 }
 
