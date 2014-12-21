@@ -1,4 +1,4 @@
-require 'oops'
+local class = require 'oops'
 
 --- Base class for players.
 local Creature = class {

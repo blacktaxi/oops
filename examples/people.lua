@@ -1,4 +1,4 @@
-require 'oops'
+local class = require 'oops'
 
 -- Simplest class. No methods, no constructor, no inheritance.
 local Creature = class { }
