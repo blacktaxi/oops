@@ -73,7 +73,7 @@ local new_class_internal = function (name, parentclass, classdef)
   }
 
   -- Assign class name.
-  cls.__name = name or ('anon@' .. tostring(cls))
+  cls.__name = name or (tostring(cls))
 
   return setmetatable(cls, {
     --- User constructor.
