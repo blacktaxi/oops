@@ -3,6 +3,24 @@ Oops
 
 [![Build Status](https://travis-ci.org/blacktaxi/oops.png?branch=master)](https://travis-ci.org/blacktaxi/oops)
 
+```lua
+local class = require 'oops'
+
+local Duck = class {
+  __init = function (self)
+    self.quacks = 0
+  end,
+
+  quack = function (self)
+    print("Quack!")
+    self.quacks = self.quacks + 1
+  end,
+}
+
+local duffy = Duck()
+duffy:quack()
+```
+
 Simple [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP for Lua with first
 class classes (class definition is an expression) and comfortable syntax.
 
@@ -11,7 +29,7 @@ Features
 * Class-based inheritance: class is a factory for objects (instances).
 * Classes as expressions (classes can be anonymous and/or defined and used on the spot).
 * Controlled visibility scope: classes don't have to be global.
-* Terse syntax: ```class { hello = function (self) print('world!') end }```.
+* Terse syntax: ```local Class = class { hello = function (self) print('world!') end }```.
 
 Example
 -------
@@ -28,9 +46,9 @@ local Human = class(Creature) {
   end
 }
 
--- Abstract method.
+-- 'Abstract' method.
 local TalkingHuman = class(Human) {
-  talk = abstract_method
+  talk = function (self) error("Abstract method call") end
 }
 
 -- Calling superclass constructor, overriding inherited method.
@@ -99,7 +117,9 @@ Michael Moore says: According to Emmanuel Goldstein, "2 + 2 = 5."
 
 To do
 -----
-- write proper docstrings
-- support for class methods/values; support for custom metamethods
-- write more tests
+- class methods/values
+- custom metamethods (operator methods)
+- static methods
+- more tests
+- better docstrings
 - compare with other OOP libraries
