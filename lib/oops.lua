@@ -1,21 +1,26 @@
---- Oops is a class-based OOP library for Lua with controlled 
--- class scope (local and anonymous classes) and succinct syntax.
+--- OOP library for Lua with terse syntax.
 -- @release 0.1
 -- @class module
--- @module 'oops'
--- @author Sergey Yavnyi
+-- @name 'oops'
+-- @author Sergey Yavnyi <blacktaxi@gmail.com>
 
+--- 'Is a class' check.
 local isclass = function (x)
   return type(x) == 'table' and type(x.__classdef) == 'table'
 end
 
+--- 'Is an object' check.
 local isobject = function (x)
   return type(x) == 'table' and isclass(x.__class)
 end
 
-local function isinstanceof(x, cls)
-  return isobject(x) and isclass(cls) and (x.__class == cls or 
-    (x.__super and isinstanceof(x.__super, cls)))
+--- 'Is an instance of' check.
+-- @param x Object that is tested for being an instance of class.
+-- @param cls A class that the object is tested against.
+-- @return Returns `true` if `obj` is an immediate instance of `cls` or one of it's ancestors.
+local function isinstanceof(obj, cls)
+  return isobject(obj) and isclass(cls) and 
+    (obj.__class == cls or (obj.__super and isinstanceof(obj.__super, cls)))
 end
 
 --- Creates a class table.
@@ -27,7 +32,8 @@ local new_class = function (name, parentclass, classdef)
   assert(
     (type(name) == 'nil' or type(name) == 'string')
     and (type(parentclass) == 'nil' or isclass(parentclass))
-    and (type(classdef) == 'nil' or type(classdef) == 'table')
+    and (type(classdef) == 'nil' or type(classdef) == 'table'),
+    "Invalid arguments"
   )
 
   local classdef = classdef or {}
