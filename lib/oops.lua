@@ -27,7 +27,7 @@ end
 -- @param name Class name.
 -- @param parentclass Parent class. Optional.
 -- @param classef Class definition table.
-local new_class = function (name, parentclass, classdef)
+local new_class_internal = function (name, parentclass, classdef)
   -- typecheck arguments
   assert(
     (type(name) == 'nil' or type(name) == 'string')
@@ -112,16 +112,16 @@ local class = function(...)
     if (isclass(a)) then
       -- class(ParentClass) { ... }
       return function (classdef)
-        return new_class(nil, a, classdef)
+        return new_class_internal(nil, a, classdef)
       end
     elseif type(a) == 'table' then
       -- class { ... }
-      return new_class(nil, nil, a)
+      return new_class_internal(nil, nil, a)
     elseif type(a) == 'string' or type(a) == nil then
       -- class("Name") { ... }
       -- class(nil) { ... }
       return function (classdef)
-        return new_class(a, nil, classdef)
+        return new_class_internal(a, nil, classdef)
       end
     else
       -- invalid arg
@@ -134,16 +134,23 @@ local class = function(...)
     -- class(nil, nil) { ... }
     local name, parent = ...
     return function (classdef)
-      return new_class(name, parent, classdef)
+      return new_class_internal(name, parent, classdef)
     end
   else
     error('Expected 1 or 2 arguments, got ' .. arg_count)
   end
 end
 
-return setmetatable({
+local MODULE = {
   class = class,
   isclass = isclass,
   isobject = isobject,
   isinstanceof = isinstanceof,
-}, { __call = function(_, ...) return class(...) end })
+}
+
+-- Add a shortcut for defining classes.
+setmetatable(MODULE, {
+  __call = function(_, ...) return class(...) end
+})
+
+return MODULE
