@@ -28,6 +28,8 @@ function bench(benchmark)
     local total_time = 0.0
     local total_iterations = 0
     collectgarbage()
+    local start_mem = collectgarbage('count')
+    collectgarbage('stop')
     -- iterate until total time is >= minimal time
     repeat
       total_time = total_time + time(function ()
@@ -37,18 +39,24 @@ function bench(benchmark)
       end)
       total_iterations = total_iterations + min_iterations
     until total_time >= min_time
+    local end_mem = collectgarbage('count')
+    collectgarbage('restart')
     print(total_iterations, total_time)
-    return total_time / total_iterations
+    return total_time, total_iterations, (end_mem - start_mem)
   end
 
   -- measure overhead
-  local overhead_tpi = proper_time(function () end)
+  local overhead_time, overhead_iterations, overhead_mem = proper_time(function () end)
+  local overhead_tpi = overhead_time / overhead_iterations
+  local overhead_mpi = overhead_mem / overhead_iterations
   -- measure actual benchmark
-  local full_tpi = proper_time(action)
+  local full_time, full_iterations, full_mem = proper_time(action)
+  local full_tpi = full_time / full_iterations
+  local full_mpi = full_mem / full_iterations
 
   print('Finished.')
 
-  return { benchmark, full_tpi - overhead_tpi }
+  return { benchmark, full_tpi - overhead_tpi, full_mpi - overhead_mpi }
 end
 
 return {
