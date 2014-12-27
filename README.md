@@ -31,6 +31,12 @@ Features
 * Controlled visibility scope: classes don't have to be global.
 * Terse syntax: ```local Class = class { hello = function (self) print('world!') end }```.
 
+Use
+---
+
+1.   `$ luarocks install oops`
+2.   `local class = require 'oops'`
+
 Example
 -------
 ```lua
