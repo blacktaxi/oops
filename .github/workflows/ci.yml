@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        lua: ['5.4', 'luajit']
+        lua: ['5.4', 'luajit-2.1.0-beta3']
 
     steps:
       - name: Checkout code
