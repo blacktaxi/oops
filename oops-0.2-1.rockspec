@@ -26,6 +26,6 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    oops = "lib/oops.lua"
+    oops = "src/oops.lua"
   }
 }

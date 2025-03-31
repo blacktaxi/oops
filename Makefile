@@ -1,6 +1,6 @@
 # Variables
 ROCKSPEC := $(shell ls *.rockspec | head -n 1)
-SRC := lib
+SRC := src
 TESTS := tests
 
 # Default target
@@ -17,7 +17,7 @@ deps:
 .PHONY: test
 test:
 	@echo "🔍 Running tests..."
-	@LUA_PATH="./lib/?.lua;;" busted $(TESTS)
+	@LUA_PATH="./src/?.lua;;" busted $(TESTS)
 
 # New target to install locally built library and run tests
 .PHONY: build-test
@@ -34,7 +34,7 @@ check-examples:
 	@set -e; \
 	for file in examples/*.lua; do \
 	  echo "▶️  Running $$file..."; \
-	  LUA_PATH="./lib/?.lua;;" lua $$file > /dev/null; \
+	  LUA_PATH="./src/?.lua;;" lua $$file > /dev/null; \
 	done
 	@echo "✅ All examples ran successfully."
 
@@ -57,7 +57,7 @@ lint:
 .PHONY: perf
 perf:
 	@echo "🚀 Running performance test..."
-	@cd perftest && LUA_PATH="../lib/?.lua;;" lua all.lua
+	@cd perftest && LUA_PATH="../src/?.lua;;" lua all.lua
 
 # Publish package to LuaRocks
 .PHONY: publish
