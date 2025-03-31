@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run current Lua file",
+      "type": "shell",
+      "command": "lua",
+      "args": ["${file}"],
+      "group": "build"
+    },
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "busted",
+      "args": ["tests/"],
+      "group": "test"
+    }
+  ]
+}
