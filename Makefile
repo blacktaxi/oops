@@ -2,7 +2,6 @@
 ROCKSPEC := $(shell ls *.rockspec | head -n 1)
 SRC := src/**/*.lua
 TESTS := tests
-PERF := perf/perf_test.lua
 
 # Default target
 .PHONY: all
@@ -36,7 +35,7 @@ lint:
 .PHONY: perf
 perf:
 	@echo "🚀 Running performance test..."
-	lua $(PERF)
+	@cd perftest && LUA_PATH="../lib/?.lua;;" lua all.lua
 
 # Publish package to LuaRocks
 .PHONY: publish
