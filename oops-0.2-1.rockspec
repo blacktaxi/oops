@@ -1,8 +1,9 @@
+rockspec_format = "1.0"
 package = "oops"
-version = "0.1-0"
+version = "0.2-1"
 source = {
   url = "git://github.com/blacktaxi/oops.git",
-  tag = "v0.1",
+  tag = "v0.2",
 }
 
 description = {
