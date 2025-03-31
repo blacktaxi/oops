@@ -1,5 +1,5 @@
-local class = require 'oops'
-local _ = require 'moses'
+local class = require('oops')
+local _ = require('moses')
 
 describe('base class functionality', function()
   it('anonymous class can be created', function()
@@ -11,7 +11,7 @@ describe('base class functionality', function()
   end)
 
   it('named class can be created', function()
-    local C = class 'Name' {}
+    local C = class('Name') {}
     local o = C()
     assert.is_true(class.isclass(C))
     assert.is_true(class.isobject(o))
@@ -270,7 +270,7 @@ describe('inspection features', function()
     it('a number/table/string/nil is not an object', function()
       assert.is_false(class.isobject { x = 5 })
       assert.is_false(class.isobject(5))
-      assert.is_false(class.isobject '666')
+      assert.is_false(class.isobject('666'))
       assert.is_false(class.isobject(nil))
     end)
   end)
@@ -282,7 +282,7 @@ describe('inspection features', function()
     it('a number/table/string/nil is not a class', function()
       assert.is_false(class.isclass { x = 5 })
       assert.is_false(class.isclass(5))
-      assert.is_false(class.isclass '666')
+      assert.is_false(class.isclass('666'))
       assert.is_false(class.isclass(nil))
     end)
   end)
@@ -314,7 +314,7 @@ describe('inspection features', function()
     end)
 
     it('returns true for objects with deep class inheritance', function()
-      local A = class 'A' {}
+      local A = class('A') {}
       local B = class('B', A) {}
       local C = class('C', B) {}
       local D = class('D', C) {}

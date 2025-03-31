@@ -3,4 +3,4 @@ indent_type = "Spaces"
 indent_width = 2
 line_endings = "Unix"
 quote_style = "AutoPreferSingle"
-call_parentheses = "None"
+call_parentheses = "NoSingleTable"

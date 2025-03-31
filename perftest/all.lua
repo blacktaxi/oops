@@ -1,6 +1,6 @@
-local class = require 'oops'
-local _ = require 'moses'
-local bench = require 'bench'
+local class = require('oops')
+local _ = require('moses')
+local bench = require('bench')
 
 local benchmarks = {
   {
