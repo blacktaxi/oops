@@ -6,12 +6,12 @@
 
 --- 'Is a class' check.
 local isclass = function(x)
-  return type(x) == "table" and type(x.__classdef) == "table"
+  return type(x) == 'table' and type(x.__classdef) == 'table'
 end
 
 --- 'Is an object' check.
 local isobject = function(x)
-  return type(x) == "table" and isclass(x.__class)
+  return type(x) == 'table' and isclass(x.__class)
 end
 
 --- 'Is an instance of' check.
@@ -31,10 +31,10 @@ end
 local new_class_internal = function(name, parentclass, classdef)
   -- typecheck arguments
   assert(
-    (type(name) == "nil" or type(name) == "string")
-      and (type(parentclass) == "nil" or isclass(parentclass))
-      and (type(classdef) == "nil" or type(classdef) == "table"),
-    "Invalid arguments"
+    (type(name) == 'nil' or type(name) == 'string')
+      and (type(parentclass) == 'nil' or isclass(parentclass))
+      and (type(classdef) == 'nil' or type(classdef) == 'table'),
+    'Invalid arguments'
   )
 
   classdef = classdef or {}
@@ -62,7 +62,7 @@ local new_class_internal = function(name, parentclass, classdef)
 
       local instanceid = tostring(instance)
       local tostringfn = function()
-        return "<object of " .. tostring(cls) .. ": " .. instanceid .. ">"
+        return '<object of ' .. tostring(cls) .. ': ' .. instanceid .. '>'
       end
 
       -- attributes not present in this instance will be
@@ -89,7 +89,7 @@ local new_class_internal = function(name, parentclass, classdef)
     end,
 
     __tostring = function()
-      return "<class: " .. cls.__name .. ">"
+      return '<class: ' .. cls.__name .. '>'
     end,
   })
 end
@@ -101,7 +101,7 @@ end
 -- @usage anon_class = class(nil, ParentClass) { <classdef>... }
 -- @usage Class = class("Class", ParentClass) { <classdef>... }
 local class = function(...)
-  local arg_count = select("#", ...)
+  local arg_count = select('#', ...)
   if arg_count == 1 then
     -- class(ParentClass) { ... }
     -- class("Name") { ... }
@@ -114,10 +114,10 @@ local class = function(...)
       return function(classdef)
         return new_class_internal(nil, a, classdef)
       end
-    elseif type(a) == "table" then
+    elseif type(a) == 'table' then
       -- class { ... }
       return new_class_internal(nil, nil, a)
-    elseif type(a) == "string" or type(a) == nil then
+    elseif type(a) == 'string' or type(a) == nil then
       -- class("Name") { ... }
       -- class(nil) { ... }
       return function(classdef)
@@ -125,7 +125,7 @@ local class = function(...)
       end
     else
       -- invalid arg
-      error("Invalid argument type. Expected class name or classdef, got: " .. a)
+      error('Invalid argument type. Expected class name or classdef, got: ' .. a)
     end
   elseif arg_count == 2 then
     -- class("Name", Parent) { ... }
@@ -137,7 +137,7 @@ local class = function(...)
       return new_class_internal(name, parent, classdef)
     end
   else
-    error("Expected 1 or 2 arguments, got " .. arg_count)
+    error('Expected 1 or 2 arguments, got ' .. arg_count)
   end
 end
 
