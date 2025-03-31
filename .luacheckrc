@@ -1,10 +1,10 @@
-std = "lua53" -- or "lua54", depending on your target version
+std = 'lua54'
 
 globals = {
   -- allow test frameworks or engine globals
-  "describe",
-  "it",
-  "assert", -- for busted
+  'describe',
+  'it',
+  'assert', -- for busted
 }
 
 ignore = {
@@ -17,9 +17,9 @@ read_globals = {
 }
 
 -- Optional: disable warnings in tests
-files["tests/.*%.lua$"] = {
+files['tests/.*%.lua$'] = {
   ignore = {
-    "111", -- global variable
-    "112", -- unused global
+    '111', -- global variable
+    '112', -- unused global
   },
 }
