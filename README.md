@@ -1,6 +1,6 @@
 # Oops
 
-[![Build Status](https://travis-ci.org/blacktaxi/oops.png?branch=master)](https://travis-ci.org/blacktaxi/oops)
+[![Build](https://github.com/blacktaxi/oops/actions/workflows/ci.yml/badge.svg)](https://github.com/blacktaxi/oops/actions/workflows/ci.yml) [![LuaRocks](https://img.shields.io/luarocks/v/blacktaxi/oops.svg)](https://luarocks.org/modules/blacktaxi/oops) [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 
 ```lua
 local class = require 'oops'
@@ -21,8 +21,6 @@ local Duck = class {
 local daffy = Duck()
 daffy:quack()
 ```
-
-Lightweight [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP for Lua with first class classes (class definition is an expression) and comfortable syntax.
 
 Oops is a lightweight, expressive, [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP system for Lua. It features first-class classes, clean inheritance, and concise syntax — all in pure Lua.
 

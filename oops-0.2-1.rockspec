@@ -7,13 +7,20 @@ source = {
 }
 
 description = {
-  summary = "OOP with concise syntax and local classes.",
+  summary = "Lightweight class-based OOP with concise syntax and local class support.",
+
   detailed = [[
-    Oops is an OOP library for Lua with class-based inheritance.
-    It supports ad-hoc class definition with very concise syntax and single
-    inheritance.
-    It is also rather performant and the most basic class is nothing more
-    than a table with initializer.
+    Oops is a lightweight object-oriented programming (OOP) library for Lua,
+    offering class-based inheritance and a clean, expressive syntax.
+
+    It supports:
+    - Concise inline class definitions
+    - Anonymous and local classes
+    - Single inheritance with superclass constructor calls
+
+    Oops is fast and minimal — the simplest class is just a table with an initializer.
+    It's designed to be easy to use, easy to extend, and suitable for both scripting
+    and larger projects.
   ]],
   homepage = "https://github.com/blacktaxi/oops",
   license = "BSD",
