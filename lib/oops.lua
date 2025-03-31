@@ -1,17 +1,17 @@
 --- OOP library for Lua with terse syntax.
--- @release 0.1
+-- @release 0.2
 -- @class module
 -- @name 'oops'
--- @author Sergey Yavnyi <blacktaxi@gmail.com>
+-- @author Serhii Yavnyi <blacktaxi@gmail.com>
 
 --- 'Is a class' check.
-local isclass = function (x)
-  return type(x) == 'table' and type(x.__classdef) == 'table'
+local isclass = function(x)
+  return type(x) == "table" and type(x.__classdef) == "table"
 end
 
 --- 'Is an object' check.
-local isobject = function (x)
-  return type(x) == 'table' and isclass(x.__class)
+local isobject = function(x)
+  return type(x) == "table" and isclass(x.__class)
 end
 
 --- 'Is an instance of' check.
@@ -19,30 +19,30 @@ end
 -- @param cls A class that the object is tested against.
 -- @return Returns `true` if `obj` is an immediate instance of `cls` or one of it's ancestors.
 local function isinstanceof(obj, cls)
-  return isobject(obj) and isclass(cls) and 
-    (obj.__class == cls or (obj.__super and isinstanceof(obj.__super, cls)))
+  return isobject(obj)
+    and isclass(cls)
+    and (obj.__class == cls or (obj.__super ~= nil and isinstanceof(obj.__super, cls)))
 end
 
 --- Creates a class table.
 -- @param name Class name.
 -- @param parentclass Parent class. Optional.
 -- @param classef Class definition table.
-local new_class_internal = function (name, parentclass, classdef)
+local new_class_internal = function(name, parentclass, classdef)
   -- typecheck arguments
   assert(
-    (type(name) == 'nil' or type(name) == 'string')
-    and (type(parentclass) == 'nil' or isclass(parentclass))
-    and (type(classdef) == 'nil' or type(classdef) == 'table'),
+    (type(name) == "nil" or type(name) == "string")
+      and (type(parentclass) == "nil" or isclass(parentclass))
+      and (type(classdef) == "nil" or type(classdef) == "table"),
     "Invalid arguments"
   )
 
-  local classdef = classdef or {}
+  classdef = classdef or {}
 
   local cls = {
     __parent = parentclass,
     -- "inherit" class definition from parent class
-    __classdef = 
-      parentclass and setmetatable(classdef, { __index = parentclass.__classdef })
+    __classdef = parentclass and setmetatable(classdef, { __index = parentclass.__classdef })
       or classdef,
 
     --- Instance constructor.
@@ -61,14 +61,14 @@ local new_class_internal = function (name, parentclass, classdef)
       instance.__class = cls
 
       local instanceid = tostring(instance)
-      local tostringfn = function ()
-        return '<object of ' .. tostring(cls) .. ': ' .. instanceid .. '>'
+      local tostringfn = function()
+        return "<object of " .. tostring(cls) .. ": " .. instanceid .. ">"
       end
 
       -- attributes not present in this instance will be
       -- indexed from parent class instance
       return super and setmetatable(instance, { __index = super, __tostring = tostringfn })
-             or setmetatable(instance, { __tostring = tostringfn })
+        or setmetatable(instance, { __tostring = tostringfn })
     end,
   }
 
@@ -89,8 +89,8 @@ local new_class_internal = function (name, parentclass, classdef)
     end,
 
     __tostring = function()
-      return '<class: ' .. cls.__name .. '>'
-    end
+      return "<class: " .. cls.__name .. ">"
+    end,
   })
 end
 
@@ -101,7 +101,7 @@ end
 -- @usage anon_class = class(nil, ParentClass) { <classdef>... }
 -- @usage Class = class("Class", ParentClass) { <classdef>... }
 local class = function(...)
-  local arg_count = select('#', ...)
+  local arg_count = select("#", ...)
   if arg_count == 1 then
     -- class(ParentClass) { ... }
     -- class("Name") { ... }
@@ -109,23 +109,23 @@ local class = function(...)
     -- class { ... }
     local a = ...
 
-    if (isclass(a)) then
+    if isclass(a) then
       -- class(ParentClass) { ... }
-      return function (classdef)
+      return function(classdef)
         return new_class_internal(nil, a, classdef)
       end
-    elseif type(a) == 'table' then
+    elseif type(a) == "table" then
       -- class { ... }
       return new_class_internal(nil, nil, a)
-    elseif type(a) == 'string' or type(a) == nil then
+    elseif type(a) == "string" or type(a) == nil then
       -- class("Name") { ... }
       -- class(nil) { ... }
-      return function (classdef)
+      return function(classdef)
         return new_class_internal(a, nil, classdef)
       end
     else
       -- invalid arg
-      error('Invalid argument type. Expected class name or classdef, got: ' .. (a))
+      error("Invalid argument type. Expected class name or classdef, got: " .. a)
     end
   elseif arg_count == 2 then
     -- class("Name", Parent) { ... }
@@ -133,11 +133,11 @@ local class = function(...)
     -- class(nil, Parent) { ... }
     -- class(nil, nil) { ... }
     local name, parent = ...
-    return function (classdef)
+    return function(classdef)
       return new_class_internal(name, parent, classdef)
     end
   else
-    error('Expected 1 or 2 arguments, got ' .. arg_count)
+    error("Expected 1 or 2 arguments, got " .. arg_count)
   end
 end
 
@@ -150,7 +150,9 @@ local MODULE = {
 
 -- Add a shortcut for defining classes.
 setmetatable(MODULE, {
-  __call = function(_, ...) return class(...) end
+  __call = function(_, ...)
+    return class(...)
+  end,
 })
 
 return MODULE
