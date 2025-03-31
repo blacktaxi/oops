@@ -15,7 +15,7 @@ dependencies = {
   "busted >= 2.0.0",
   "luacheck",
   "mobdebug",
-  "moses"
+  "moses == 1.6.1-1"
 }
 
 build = {
