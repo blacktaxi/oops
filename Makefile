@@ -5,7 +5,7 @@ TESTS := tests
 
 # Default target
 .PHONY: all
-all: lint format test
+all: lint format test check-examples
 
 # Install development dependencies
 .PHONY: deps
@@ -18,6 +18,16 @@ deps:
 test:
 	@echo "🔍 Running tests..."
 	@LUA_PATH="./lib/?.lua;;" busted $(TESTS)
+
+.PHONY: check-examples
+check-examples:
+	@echo "📦 Running example scripts..."
+	@set -e; \
+	for file in examples/*.lua; do \
+	  echo "▶️  Running $$file..."; \
+	  LUA_PATH="./lib/?.lua;;" lua $$file > /dev/null; \
+	done
+	@echo "✅ All examples ran successfully."
 
 # Run stylua formatter
 .PHONY: format
