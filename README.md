@@ -1,11 +1,11 @@
-Oops
-====
+# Oops
 
 [![Build Status](https://travis-ci.org/blacktaxi/oops.png?branch=master)](https://travis-ci.org/blacktaxi/oops)
 
 ```lua
 local class = require 'oops'
 
+-- Define a class
 local Duck = class {
   __init = function (self)
     self.quacks = 0
@@ -17,115 +17,84 @@ local Duck = class {
   end,
 }
 
-local duffy = Duck()
-duffy:quack()
+-- Instantiate and use the class
+local daffy = Duck()
+daffy:quack()
 ```
 
-Simple [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP for Lua with first
-class classes (class definition is an expression) and comfortable syntax.
+Lightweight [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP for Lua with first class classes (class definition is an expression) and comfortable syntax.
 
-Features
---------
-* Class-based inheritance: class is a factory for objects (instances).
-* Classes as expressions (classes can be anonymous and/or defined and used on the spot).
-* Controlled visibility scope: classes don't have to be global.
-* Terse syntax: ```local Class = class { hello = function (self) print('world!') end }```.
+Oops is a lightweight, expressive, [class-based](http://en.wikipedia.org/wiki/Class-based_programming) OOP system for Lua. It features first-class classes, clean inheritance, and concise syntax — all in pure Lua.
 
-Use
----
+## Features
 
-1.   `$ luarocks install oops`
-2.   `local class = require 'oops'`
+- Class-based single inheritance: class is a factory of objects (instances).
+- Classes as expressions (classes can be anonymous and/or defined and used on the spot).
+- Controlled visibility scope: classes don't have to be global.
+- Concise syntax: `local Class = class { hello = function (self) print('world!') end }`.
+- Performance-optimized.
 
-Example
--------
+## Use
+
+1.  `$ luarocks install oops`
+2.  `local class = require 'oops'`
+
+## Examples
+
+Inheritance and superclass constructor:
+
 ```lua
-require 'oops'
-
--- Simplest class. No methods, no constructor, no inheritance.
-local Creature = class { }
-
--- Inheritance, constructor.
-local Human = class(Creature) {
-  __init = function (self, name)
+local Person = class {
+  __init = function(self, name)
     self.name = name
-  end
-}
-
--- 'Abstract' method.
-local TalkingHuman = class(Human) {
-  talk = function (self) error("Abstract method call") end
-}
-
--- Calling superclass constructor, overriding inherited method.
-local Scientist = class(TalkingHuman) {
-  __init = function (self, name, discovery)
-    self.__super:__init(name)
-    self.discovery = discovery
   end,
-
-  talk = function (self)
-    return 'It is a scientific fact that ' .. self.discovery .. '.'
-  end
 }
 
--- Overriding.
-local Zombie = class(TalkingHuman) {
-  talk = function (self) return 'Mmmrhrhgmhmmm...' end
-}
-
--- Interacting with other objects.
-local Journalist = class(TalkingHuman) {
-  __init = function (self, name, interviewee)
+local Student = class(Person) {
+  __init = function(self, name, school)
     self.__super:__init(name)
-    self.interviewee = interviewee
+    self.school = school
   end,
-
-  talk = function (self)
-    return 'According to ' .. self.interviewee.name .. ', "' ..
-      self.interviewee:talk() .. '."'
-  end
 }
 
--- Array of objects.
-local people = { 
-  Scientist('John von Neumann', 
-    'a von Neumann algebra or W*-algebra is a *-algebra of bounded' .. 
-    ' operators on a Hilbert space that is closed in the weak operator' .. 
-    ' topology and contains the identity operator.'),
-
-  Zombie('Victor Tsoi'),
-
-  -- Declaring and instantiating an anonymous class at the same time.
-  Journalist('Michael Moore',
-    (class(TalkingHuman) { 
-      talk = function (self) return '2 + 2 = 5' end 
-    })('Emmanuel Goldstein'))
-}
-
-local interview = function (who)
-  -- Dynamic dispatch.
-  print(who.name .. ' says: ' .. who:talk())
-end
-
--- Polymorphism.
-for _, v in pairs(people) do
-  interview(v)
-end
+print(Student("Ada", "Academy").name)  -- prints: Ada
 ```
 
-```
-$ lua people.lua
-John von Neumann says: It is a scientific fact that a von Neumann algebra or W*-algebra is a *-algebra of bounded operators on a Hilbert space that is closed in the weak operator topology and contains the identity operator..
-Victor Tsoi says: Mmmrhrhgmhmmm...
-Michael Moore says: According to Emmanuel Goldstein, "2 + 2 = 5."
+Anonymous class instance:
+
+```lua
+local greeter = (class {
+  greet = function(self) print("Hello!") end
+})()
+
+greeter:greet()  -- prints: Hello!
 ```
 
-To do
------
+Runtime type checking:
+
+```lua
+local class = require("oops").class
+local isinstanceof = require("oops").isinstanceof
+
+local A = class {}
+local B = class(A) {}
+
+local obj = B()
+print(isinstanceof(obj, A))  -- true
+print(isinstanceof(obj, B))  -- true
+```
+
+For more examples see [`examples/](./examples).
+
+## To do
+
 - class methods/values
 - custom metamethods (operator methods)
 - static methods
 - more tests
 - better docstrings
 - compare with other OOP libraries
+
+## License
+
+BSD 3-clause.
