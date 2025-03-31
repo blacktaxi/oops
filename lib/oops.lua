@@ -39,7 +39,7 @@ local new_class_internal = function(name, parentclass, classdef)
 
   classdef = classdef or {}
 
-  local cls = {
+  local class = {
     __parent = parentclass,
     -- "inherit" class definition from parent class
     __classdef = parentclass and setmetatable(classdef, { __index = parentclass.__classdef })
@@ -73,9 +73,9 @@ local new_class_internal = function(name, parentclass, classdef)
   }
 
   -- Assign class name.
-  cls.__name = name or (tostring(cls))
+  class.__name = name or (tostring(class))
 
-  return setmetatable(cls, {
+  return setmetatable(class, {
     --- User constructor.
     __call = function(cls, ...)
       local i = cls:__create()
@@ -89,7 +89,7 @@ local new_class_internal = function(name, parentclass, classdef)
     end,
 
     __tostring = function()
-      return '<class: ' .. cls.__name .. '>'
+      return '<class: ' .. class.__name .. '>'
     end,
   })
 end

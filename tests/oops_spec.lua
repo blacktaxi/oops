@@ -67,7 +67,7 @@ describe('base class functionality', function()
 
   it('methods should return values', function()
     local o = (class {
-      method = function(self)
+      method = function(_)
         return 5
       end,
     })()
@@ -109,7 +109,7 @@ describe('inheritance and dispatch', function()
   it('inheriting from not a class value should yield an error', function()
     assert.error(function()
       local x = 5
-      local C = class(x) {}
+      local _ = class(x) {}
     end)
   end)
 
@@ -117,7 +117,7 @@ describe('inheritance and dispatch', function()
     local method_called = false
 
     local C1 = class {
-      method = function(self)
+      method = function(_)
         method_called = true
       end,
     }
@@ -134,7 +134,7 @@ describe('inheritance and dispatch', function()
     local method_called = false
 
     local C1 = class {
-      method = function(self)
+      method = function(_)
         method_called = true
       end,
     }
@@ -154,13 +154,13 @@ describe('inheritance and dispatch', function()
     local C2_method_called = false
 
     local C1 = class {
-      method = function(self)
+      method = function(_)
         C1_method_called = true
       end,
     }
 
     local C2 = class(nil, C1) {
-      method = function(self)
+      method = function(_)
         C2_method_called = true
       end,
     }
@@ -173,8 +173,11 @@ describe('inheritance and dispatch', function()
   end)
 
   it('it should be possible to call method of a superclass explicitly', function()
+    local C1_method_called = false
+    local C2_method_called = false
+
     local C1 = class {
-      method = function(self)
+      method = function(_)
         C1_method_called = true
       end,
     }
@@ -196,7 +199,7 @@ describe('inheritance and dispatch', function()
   it('method calls should be dispatched dynamically', function()
     local create_class = function(return_value, parent_class)
       return class(nil, parent_class) {
-        method = function(self)
+        method = function(_)
           return return_value
         end,
       }
@@ -211,7 +214,7 @@ describe('inheritance and dispatch', function()
 
     assert.is_equal(
       table.unpack { 1, 2, 3, 4, 5, 4 },
-      table.unpack(_.map({ C1, C2, C3, C4, C5, C6 }, function(i, cls)
+      table.unpack(_.map({ C1, C2, C3, C4, C5, C6 }, function(_, cls)
         local o = cls()
         return o:method()
       end))
@@ -288,29 +291,29 @@ describe('inspection features', function()
   end)
 
   describe('class.isinstanceof', function()
-    local C = class {}
-    local C2 = class(C) {}
+    local Class = class {}
+    local Class2 = class(Class) {}
 
     it("an object is instance of it's class", function()
-      assert.is_true(class.isinstanceof(C(), C))
+      assert.is_true(class.isinstanceof(Class(), Class))
     end)
 
     it("an object is instance of it's class' parent", function()
-      assert.is_true(class.isinstanceof(C2(), C))
+      assert.is_true(class.isinstanceof(Class2(), Class))
     end)
 
     it('a number/table/string/nil is not an instance of a class', function()
-      assert.is_false(class.isinstanceof(5, C))
-      assert.is_false(class.isinstanceof({ x = 5 }, C))
-      assert.is_false(class.isinstanceof('5', C))
-      assert.is_false(class.isinstanceof(nil, C))
+      assert.is_false(class.isinstanceof(5, Class))
+      assert.is_false(class.isinstanceof({ x = 5 }, Class))
+      assert.is_false(class.isinstanceof('5', Class))
+      assert.is_false(class.isinstanceof(nil, Class))
     end)
 
     it('an object is not an instance of not a class', function()
-      assert.is_false(class.isinstanceof(C(), 5))
-      assert.is_false(class.isinstanceof(C(), '5'))
-      assert.is_false(class.isinstanceof(C(), { x = 5 }))
-      assert.is_false(class.isinstanceof(C(), nil))
+      assert.is_false(class.isinstanceof(Class(), 5))
+      assert.is_false(class.isinstanceof(Class(), '5'))
+      assert.is_false(class.isinstanceof(Class(), { x = 5 }))
+      assert.is_false(class.isinstanceof(Class(), nil))
     end)
 
     it('returns true for objects with deep class inheritance', function()

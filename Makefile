@@ -1,6 +1,6 @@
 # Variables
 ROCKSPEC := $(shell ls *.rockspec | head -n 1)
-SRC := src/**/*.lua
+SRC := lib
 TESTS := tests
 
 # Default target
