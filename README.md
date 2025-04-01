@@ -81,14 +81,53 @@ print(isinstanceof(obj, A))  -- true
 print(isinstanceof(obj, B))  -- true
 ```
 
+Class fields and methods:
+
+```lua
+local class = require("oops")
+
+local Counter = class {
+  __class = {
+    value = 0,
+
+    increment = function(cls)
+      cls.value = cls.value + 1
+    end,
+  },
+}
+
+Counter:increment()
+Counter:increment()
+
+print("Counter value:", Counter.value)  --> 2
+
+-- Subclass inherits class method, but not shared field
+local Sub = class(Counter) {}
+Sub:increment()
+
+print("Counter value:", Counter.value)  --> 2
+print("Sub value:", Sub.value)          --> 1
+```
+
 For more examples see [`examples/](./examples).
+
+## Development
+
+To start:
+
+```bash
+make deps && make all
+```
+
+Performance benchmark:
+
+```bash
+make perf
+```
 
 ## To do
 
-- class methods/values
 - custom metamethods (operator methods)
-- static methods
-- more tests
 - better docstrings
 - compare with other OOP libraries
 

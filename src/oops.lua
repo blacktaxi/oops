@@ -76,7 +76,7 @@ local new_class_internal = function(name, parentclass, classdef)
     end,
   }
 
-  -- inherit static fields from parent
+  -- inherit class fields from parent
   class_fields = setmetatable(class_fields, {
     __index = parentclass and parentclass.__class_fields or nil,
   })
@@ -87,7 +87,7 @@ local new_class_internal = function(name, parentclass, classdef)
   class.__name = name or (tostring(class))
 
   return setmetatable(class, {
-    --- Static fields
+    --- Class fields
     __index = class_fields,
 
     --- Constructor impl
