@@ -65,6 +65,85 @@ describe('base class functionality', function()
     assert.is_equal(table.unpack { 1, 2, 3, 4, 5 }, table.unpack(o.init_args))
   end)
 
+  it('inherits __init from parent class', function()
+    local A = class {
+      __init = function(self)
+        self.x = 42
+      end,
+    }
+
+    local B = class(A) {}
+    local o = B()
+    assert.is_equal(o.x, 42)
+  end)
+
+  it('can call parent __init via __super', function()
+    local A = class {
+      __init = function(self)
+        self.base = true
+      end,
+    }
+
+    local B = class(A) {
+      __init = function(self)
+        self.__super:__init()
+        self.sub = true
+      end,
+    }
+
+    local o = B()
+    assert.is_true(o.base)
+    assert.is_true(o.sub)
+  end)
+
+  it('inherits methods through multiple levels', function()
+    local A = class {
+      greet = function(self)
+        return 'hello'
+      end,
+    }
+
+    local B = class(A) {}
+    local C = class(B) {}
+
+    local o = C()
+    assert.is_equal(o:greet(), 'hello')
+  end)
+
+  it('can call ancestor method explicitly', function()
+    local A = class {
+      greet = function(self)
+        return 'A'
+      end,
+    }
+
+    local B = class(A) {
+      greet = function(self)
+        return self.__super:greet() .. 'B'
+      end,
+    }
+
+    local o = B()
+    assert.is_equal(o:greet(), 'AB')
+  end)
+
+  it('ensures instance state is not shared', function()
+    local C = class {
+      __init = function(self)
+        self.count = 0
+      end,
+      inc = function(self)
+        self.count = self.count + 1
+      end,
+    }
+
+    local a = C()
+    local b = C()
+    a:inc()
+    assert.is_equal(a.count, 1)
+    assert.is_equal(b.count, 0)
+  end)
+
   it('methods should return values', function()
     local o = (class {
       method = function(_)
