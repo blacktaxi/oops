@@ -1,33 +1,42 @@
---- OOP library for Lua with terse syntax.
+--- Lightweight class-based OOP for Lua with concise syntax and local classes.
 -- @release 0.2
 -- @class module
--- @name 'oops'
+-- @name oops
 -- @author Serhii Yavnyi <blacktaxi@gmail.com>
 
---- 'Is a class' check.
+--- Checks whether a value is a class created by `oops`.
+-- @param x any: The value to check.
+-- @return boolean: `true` if `x` is a class, `false` otherwise.
 local isclass = function(x)
   return type(x) == 'table' and type(x.__classdef) == 'table'
 end
 
---- 'Is an object' check.
+--- Checks whether a value is an instance of a class.
+-- @param x any: The value to check.
+-- @return boolean: `true` if `x` is an object created via a class, `false` otherwise.
 local isobject = function(x)
   return type(x) == 'table' and isclass(x.__class)
 end
 
---- 'Is an instance of' check.
--- @param x Object that is tested for being an instance of class.
--- @param cls A class that the object is tested against.
--- @return Returns `true` if `obj` is an immediate instance of `cls` or one of it's ancestors.
+--- Checks whether an object is an instance of a given class or one of its ancestors.
+-- @param obj table: The object to test.
+-- @param cls table: The class to check against.
+-- @return boolean: `true` if `obj` is an instance of `cls` or its parent, `false` otherwise.
+-- @usage
+-- local A = class { }
+-- local a = A()
+-- assert(isinstanceof(a, A))
 local function isinstanceof(obj, cls)
   return isobject(obj)
     and isclass(cls)
     and (obj.__class == cls or (obj.__super ~= nil and isinstanceof(obj.__super, cls)))
 end
 
---- Creates a class table.
--- @param name Class name.
--- @param parentclass Parent class. Optional.
--- @param classef Class definition table.
+--- Internal: creates a new class.
+-- @param name string|nil: Optional class name.
+-- @param parentclass table|nil: Optional parent class.
+-- @param classdef table: Table containing instance methods and special keys (e.g. `__init`, `__class`).
+-- @return table: A new class.
 local new_class_internal = function(name, parentclass, classdef)
   -- typecheck arguments
   assert(
@@ -108,12 +117,23 @@ local new_class_internal = function(name, parentclass, classdef)
   })
 end
 
---- Defines a new class.
+--- Defines a new class with optional name and/or parent.
+--
+-- Usage patterns:
+-- ```lua
+-- local C = class { __init = function(self) ... end }
+-- local Named = class("Named") { ... }
+-- local Sub = class(BaseClass) { ... }
+-- local Derived = class("Derived", BaseClass) { ... }
+-- ```
+--
 -- @usage anon_class = class { <classdef>... }
 -- @usage Class = class("Class") { <classdef>... }
 -- @usage anon_class = class(ParentClass) { <classdef>... }
 -- @usage anon_class = class(nil, ParentClass) { <classdef>... }
 -- @usage Class = class("Class", ParentClass) { <classdef>... }
+-- @param ... string|table|nil: Class name, parent class, or class definition.
+-- @return function|table: Returns a function that accepts the class definition, or the class itself.
 local class = function(...)
   local arg_count = select('#', ...)
   if arg_count == 1 then
@@ -162,7 +182,7 @@ local MODULE = {
   isinstanceof = isinstanceof,
 }
 
--- Add a shortcut for defining classes.
+-- Allow shortcut: `local MyClass = require('oops')("Name") { ... }`
 setmetatable(MODULE, {
   __call = function(_, ...)
     return class(...)

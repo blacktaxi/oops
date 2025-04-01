@@ -128,7 +128,6 @@ make perf
 ## To do
 
 - custom metamethods (operator methods)
-- better docstrings
 - compare with other OOP libraries
 
 ## License
