@@ -39,9 +39,9 @@ local new_class_internal = function(name, parentclass, classdef)
 
   classdef = classdef or {}
 
-  -- extract and remove __static from classdef
-  local static_fields = classdef.__static or {}
-  classdef.__static = nil
+  -- extract and remove __class from classdef
+  local class_fields = classdef.__class or {}
+  classdef.__class = nil
 
   local class = {
     __parent = parentclass,
@@ -77,18 +77,18 @@ local new_class_internal = function(name, parentclass, classdef)
   }
 
   -- inherit static fields from parent
-  local static = setmetatable(static_fields, {
-    __index = parentclass and parentclass.__static or nil,
+  class_fields = setmetatable(class_fields, {
+    __index = parentclass and parentclass.__class_fields or nil,
   })
 
-  class.__static = static
+  class.__class_fields = class_fields
 
   -- Assign class name.
   class.__name = name or (tostring(class))
 
   return setmetatable(class, {
     --- Static fields
-    __index = static,
+    __index = class_fields,
 
     --- Constructor impl
     __call = function(cls, ...)

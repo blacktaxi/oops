@@ -414,10 +414,10 @@ describe('inspection features', function()
   end)
 end)
 
-describe('class static fields', function()
-  it('supports static fields via __static', function()
+describe('class class fields', function()
+  it('supports class fields via __class', function()
     local C = class {
-      __static = {
+      __class = {
         version = '1.0',
       },
     }
@@ -425,10 +425,10 @@ describe('class static fields', function()
     assert.is_equal(C.version, '1.0')
   end)
 
-  it('supports static methods via __static', function()
+  it('supports class methods via __class', function()
     local C = class {
-      __static = {
-        get_version = function(cls)
+      __class = {
+        get_version = function(_)
           return '1.0'
         end,
       },
@@ -437,9 +437,9 @@ describe('class static fields', function()
     assert.is_equal(C:get_version(), '1.0')
   end)
 
-  it('does not copy static fields to instances', function()
+  it('does not copy class fields to instances', function()
     local C = class {
-      __static = {
+      __class = {
         counter = 42,
       },
     }
@@ -448,9 +448,9 @@ describe('class static fields', function()
     assert.is_nil(o.counter)
   end)
 
-  it('inherits static fields from parent', function()
+  it('inherits class fields from parent', function()
     local Base = class {
-      __static = {
+      __class = {
         tag = 'base',
       },
     }
@@ -460,9 +460,9 @@ describe('class static fields', function()
     assert.is_equal(Derived.tag, 'base')
   end)
 
-  it('allows static method to access and mutate class-level fields', function()
+  it('allows class method to access and mutate class-level fields', function()
     local C = class {
-      __static = {
+      __class = {
         count = 0,
         next_id = function(cls)
           cls.count = cls.count + 1
@@ -478,9 +478,9 @@ describe('class static fields', function()
     assert.is_equal(id2, 2)
   end)
 
-  it('mutates static field in parent and does not reflect in child', function()
+  it('mutates class field in parent and does not reflect in child', function()
     local A = class {
-      __static = {
+      __class = {
         count = 0,
       },
     }
@@ -491,9 +491,9 @@ describe('class static fields', function()
     assert.is_equal(B.count, 0)
   end)
 
-  it('mutates static field in child and does not reflect in parent', function()
+  it('mutates class field in child and does not reflect in parent', function()
     local A = class {
-      __static = {
+      __class = {
         count = 0,
       },
     }
@@ -504,9 +504,9 @@ describe('class static fields', function()
     assert.is_equal(A.count, 0)
   end)
 
-  it('allows static method to mutate shared field but does not propagate to child', function()
+  it('allows class method to mutate shared field but does not propagate to child', function()
     local Counter = class {
-      __static = {
+      __class = {
         value = 0,
         increment = function(cls)
           cls.value = cls.value + 1
@@ -522,9 +522,9 @@ describe('class static fields', function()
     assert.is_equal(Sub.value, 0)
   end)
 
-  it('allows static method to mutate shared field but does not propagate to parent', function()
+  it('allows class method to mutate shared field but does not propagate to parent', function()
     local Counter = class {
-      __static = {
+      __class = {
         value = 0,
         increment = function(cls)
           cls.value = cls.value + 1
@@ -540,9 +540,9 @@ describe('class static fields', function()
     assert.is_equal(Sub.value, 2)
   end)
 
-  it('shadows static field by assignment', function()
+  it('shadows class field by assignment', function()
     local A = class {
-      __static = { name = 'Base' },
+      __class = { name = 'Base' },
     }
     local B = class(A) {}
     B.name = 'Child'
@@ -550,9 +550,9 @@ describe('class static fields', function()
     assert.is_equal(A.name, 'Base')
   end)
 
-  it('inherits and calls static methods', function()
+  it('inherits and calls class methods', function()
     local A = class {
-      __static = {
+      __class = {
         info = function(cls)
           return 'Hello from ' .. (cls.name or 'Anonymous')
         end,
@@ -563,9 +563,9 @@ describe('class static fields', function()
     assert.is_equal(B:info(), 'Hello from B')
   end)
 
-  it('child can shadow static field without affecting parent', function()
+  it('child can shadow class field without affecting parent', function()
     local A = class {
-      __static = {
+      __class = {
         kind = 'A',
       },
     }
@@ -579,7 +579,7 @@ describe('class static fields', function()
 
   it('mutating table shared between relatives', function()
     local A = class {
-      __static = {
+      __class = {
         data = { val = 1 },
       },
     }
@@ -592,9 +592,9 @@ describe('class static fields', function()
     assert.is_equal(B.data.val, 99)
   end)
 
-  it('can assign a new static field in child without affecting parent', function()
+  it('can assign a new class field in child without affecting parent', function()
     local A = class {
-      __static = {
+      __class = {
         a = 1,
       },
     }
@@ -604,5 +604,48 @@ describe('class static fields', function()
 
     assert.is_nil(A.b)
     assert.is_equal(B.b, 2)
+  end)
+
+  it('allows class method override in subclass', function()
+    local A = class {
+      __class = {
+        foo = function()
+          return 'A'
+        end,
+      },
+    }
+    local B = class(A) {
+      __class = {
+        foo = function()
+          return 'B'
+        end,
+      },
+    }
+    assert.is_equal(B:foo(), 'B')
+    assert.is_equal(A:foo(), 'A')
+  end)
+
+  it('class method does not access instance state', function()
+    local C = class {
+      __init = function(self)
+        self.name = 'oops'
+      end,
+      __class = {
+        say_name = function(self)
+          return self.name -- should be nil
+        end,
+      },
+    }
+
+    assert.is_nil(C:say_name())
+  end)
+
+  it('does not copy class fields into instances', function()
+    local C = class {
+      __class = { x = 1 },
+    }
+
+    local o = C()
+    assert.is_nil(o.x)
   end)
 end)
