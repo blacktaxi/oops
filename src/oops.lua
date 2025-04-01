@@ -89,7 +89,6 @@ local new_class_internal = function(name, parentclass, classdef)
   return setmetatable(class, {
     --- Static fields
     __index = static,
-    __newindex = static,
 
     --- Constructor impl
     __call = function(cls, ...)

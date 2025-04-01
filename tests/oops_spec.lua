@@ -381,7 +381,7 @@ describe('class static fields', function()
     assert.is_equal(Derived.tag, 'base')
   end)
 
-  it('allows static method to access class-level fields', function()
+  it('allows static method to access and mutate class-level fields', function()
     local C = class {
       __static = {
         count = 0,
@@ -398,23 +398,8 @@ describe('class static fields', function()
     assert.is_equal(id1, 1)
     assert.is_equal(id2, 2)
   end)
-end)
 
-describe('static method and field behavior', function()
-  it('inherits static fields from parent class', function()
-    local A = class {
-      __static = {
-        greeting = 'Hello',
-      },
-    }
-
-    local B = class(A) {}
-
-    assert.is_equal(A.greeting, 'Hello')
-    assert.is_equal(B.greeting, 'Hello')
-  end)
-
-  it('mutates static field in parent and reflects in child', function()
+  it('mutates static field in parent and does not reflect in child', function()
     local A = class {
       __static = {
         count = 0,
@@ -424,10 +409,41 @@ describe('static method and field behavior', function()
     local B = class(A) {}
 
     A.count = A.count + 1
-    assert.is_equal(B.count, 1) -- inherited dynamically via metatable
+    assert.is_equal(B.count, 0)
   end)
 
-  it('allows static method to mutate shared field', function()
+  it('mutates static field in child and does not reflect in parent', function()
+    local A = class {
+      __static = {
+        count = 0,
+      },
+    }
+
+    local B = class(A) {}
+
+    B.count = B.count + 1
+    assert.is_equal(A.count, 0)
+  end)
+
+  it('allows static method to mutate shared field but does not propagate to child', function()
+    local Counter = class {
+      __static = {
+        value = 0,
+        increment = function(cls)
+          cls.value = cls.value + 1
+        end,
+      },
+    }
+
+    local Sub = class(Counter) {}
+
+    Counter:increment()
+    Counter:increment()
+    assert.is_equal(Counter.value, 2)
+    assert.is_equal(Sub.value, 0)
+  end)
+
+  it('allows static method to mutate shared field but does not propagate to parent', function()
     local Counter = class {
       __static = {
         value = 0,
@@ -441,8 +457,31 @@ describe('static method and field behavior', function()
 
     Sub:increment()
     Sub:increment()
-    assert.is_equal(Counter.value, 2)
+    assert.is_equal(Counter.value, 0)
     assert.is_equal(Sub.value, 2)
+  end)
+
+  it('shadows static field by assignment', function()
+    local A = class {
+      __static = { name = 'Base' },
+    }
+    local B = class(A) {}
+    B.name = 'Child'
+    assert.is_equal(B.name, 'Child')
+    assert.is_equal(A.name, 'Base')
+  end)
+
+  it('inherits and calls static methods', function()
+    local A = class {
+      __static = {
+        info = function(cls)
+          return 'Hello from ' .. (cls.name or 'Anonymous')
+        end,
+      },
+    }
+    local B = class(A) {}
+    B.name = 'B'
+    assert.is_equal(B:info(), 'Hello from B')
   end)
 
   it('child can shadow static field without affecting parent', function()
