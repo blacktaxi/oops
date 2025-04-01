@@ -334,3 +334,157 @@ describe('inspection features', function()
     end)
   end)
 end)
+
+describe('class static fields', function()
+  it('supports static fields via __static', function()
+    local C = class {
+      __static = {
+        version = '1.0',
+      },
+    }
+
+    assert.is_equal(C.version, '1.0')
+  end)
+
+  it('supports static methods via __static', function()
+    local C = class {
+      __static = {
+        get_version = function(cls)
+          return '1.0'
+        end,
+      },
+    }
+
+    assert.is_equal(C:get_version(), '1.0')
+  end)
+
+  it('does not copy static fields to instances', function()
+    local C = class {
+      __static = {
+        counter = 42,
+      },
+    }
+
+    local o = C()
+    assert.is_nil(o.counter)
+  end)
+
+  it('inherits static fields from parent', function()
+    local Base = class {
+      __static = {
+        tag = 'base',
+      },
+    }
+
+    local Derived = class('Derived', Base) {}
+
+    assert.is_equal(Derived.tag, 'base')
+  end)
+
+  it('allows static method to access class-level fields', function()
+    local C = class {
+      __static = {
+        count = 0,
+        next_id = function(cls)
+          cls.count = cls.count + 1
+          return cls.count
+        end,
+      },
+    }
+
+    local id1 = C:next_id()
+    local id2 = C:next_id()
+
+    assert.is_equal(id1, 1)
+    assert.is_equal(id2, 2)
+  end)
+end)
+
+describe('static method and field behavior', function()
+  it('inherits static fields from parent class', function()
+    local A = class {
+      __static = {
+        greeting = 'Hello',
+      },
+    }
+
+    local B = class(A) {}
+
+    assert.is_equal(A.greeting, 'Hello')
+    assert.is_equal(B.greeting, 'Hello')
+  end)
+
+  it('mutates static field in parent and reflects in child', function()
+    local A = class {
+      __static = {
+        count = 0,
+      },
+    }
+
+    local B = class(A) {}
+
+    A.count = A.count + 1
+    assert.is_equal(B.count, 1) -- inherited dynamically via metatable
+  end)
+
+  it('allows static method to mutate shared field', function()
+    local Counter = class {
+      __static = {
+        value = 0,
+        increment = function(cls)
+          cls.value = cls.value + 1
+        end,
+      },
+    }
+
+    local Sub = class(Counter) {}
+
+    Sub:increment()
+    Sub:increment()
+    assert.is_equal(Counter.value, 2)
+    assert.is_equal(Sub.value, 2)
+  end)
+
+  it('child can shadow static field without affecting parent', function()
+    local A = class {
+      __static = {
+        kind = 'A',
+      },
+    }
+
+    local B = class(A) {}
+    B.kind = 'B' -- shadows parent field
+
+    assert.is_equal(A.kind, 'A')
+    assert.is_equal(B.kind, 'B')
+  end)
+
+  it('modifying child static field does not mutate parent', function()
+    local A = class {
+      __static = {
+        data = { val = 1 },
+      },
+    }
+
+    local B = class(A) {}
+
+    B.data.val = 99
+    -- B and A share the same table (no deep copy)
+    assert.is_equal(A.data.val, 99)
+    assert.is_equal(B.data.val, 99)
+  end)
+
+  it('can assign a new static field in child without affecting parent', function()
+    local A = class {
+      __static = {
+        a = 1,
+      },
+    }
+
+    local B = class(A) {}
+    B.b = 2
+
+    assert.is_nil(A.b)
+    assert.is_equal(B.b, 2)
+  end)
+end)

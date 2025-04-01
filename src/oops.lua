@@ -39,6 +39,10 @@ local new_class_internal = function(name, parentclass, classdef)
 
   classdef = classdef or {}
 
+  -- extract and remove __static from classdef
+  local static_fields = classdef.__static or {}
+  classdef.__static = nil
+
   local class = {
     __parent = parentclass,
     -- "inherit" class definition from parent class
@@ -72,11 +76,22 @@ local new_class_internal = function(name, parentclass, classdef)
     end,
   }
 
+  -- inherit static fields from parent
+  local static = setmetatable(static_fields, {
+    __index = parentclass and parentclass.__static or nil,
+  })
+
+  class.__static = static
+
   -- Assign class name.
   class.__name = name or (tostring(class))
 
   return setmetatable(class, {
-    --- User constructor.
+    --- Static fields
+    __index = static,
+    __newindex = static,
+
+    --- Constructor impl
     __call = function(cls, ...)
       local i = cls:__create()
 
