@@ -172,24 +172,78 @@ local benchmarks = {
       end
     end,
   },
+  {
+    name = 'Static field read',
+    action = function()
+      local C = class {
+        __static = {
+          foo = 42,
+        },
+      }
+      return function()
+        local _ = C.foo
+      end
+    end,
+  },
+  {
+    name = 'Static field write',
+    action = function()
+      local C = class {
+        __static = {
+          foo = 0,
+        },
+      }
+      return function()
+        C.foo = C.foo + 1
+      end
+    end,
+  },
+  {
+    name = 'Inherited static field read',
+    action = function()
+      local Base = class {
+        __static = {
+          shared = 'hello',
+        },
+      }
+      local Sub = class(Base) {}
+      return function()
+        local _ = Sub.shared
+      end
+    end,
+  },
+  {
+    name = 'Static method call',
+    action = function()
+      local C = class {
+        __static = {
+          hello = function(cls)
+            return 'hi'
+          end,
+        },
+      }
+      return function()
+        C:hello()
+      end
+    end,
+  },
+  {
+    name = 'Inherited static method call',
+    action = function()
+      local A = class {
+        __static = {
+          ping = function(cls)
+            return 'pong'
+          end,
+        },
+      }
+      local B = class(A) {}
+      return function()
+        B:ping()
+      end
+    end,
+  },
 }
-
-local print_results_ = function(results)
-  for _, r in ipairs(results) do
-    local b, tpi, mpi = table.unpack(r)
-
-    print(
-      b.name
-        .. ': \t\t\t'
-        .. 1 / tpi
-        .. 'op/sec, \t\t'
-        .. tpi * 1000000
-        .. ' us/op, \t\t'
-        .. mpi * 1000
-        .. ' Kb/1000'
-    )
-  end
-end
 
 local function format_ops_per_sec(ops)
   local units = { '', 'K', 'M', 'G' }

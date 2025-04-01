@@ -498,7 +498,7 @@ describe('class static fields', function()
     assert.is_equal(B.kind, 'B')
   end)
 
-  it('modifying child static field does not mutate parent', function()
+  it('mutating table shared between relatives', function()
     local A = class {
       __static = {
         data = { val = 1 },
@@ -508,7 +508,7 @@ describe('class static fields', function()
     local B = class(A) {}
 
     B.data.val = 99
-    -- B and A share the same table (no deep copy)
+    -- B and A share the same table
     assert.is_equal(A.data.val, 99)
     assert.is_equal(B.data.val, 99)
   end)
