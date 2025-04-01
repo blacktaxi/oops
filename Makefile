@@ -5,7 +5,7 @@ TESTS := tests
 
 # Default target
 .PHONY: all
-all: lint format test check-examples
+all: lint test check-examples
 
 # Install development dependencies
 .PHONY: deps

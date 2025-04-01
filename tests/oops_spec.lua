@@ -98,7 +98,7 @@ describe('base class functionality', function()
 
   it('inherits methods through multiple levels', function()
     local A = class {
-      greet = function(self)
+      greet = function(_)
         return 'hello'
       end,
     }
@@ -112,7 +112,7 @@ describe('base class functionality', function()
 
   it('can call ancestor method explicitly', function()
     local A = class {
-      greet = function(self)
+      greet = function(_)
         return 'A'
       end,
     }
