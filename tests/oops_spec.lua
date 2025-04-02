@@ -649,3 +649,73 @@ describe('class class fields', function()
     assert.is_nil(o.x)
   end)
 end)
+
+describe('metamethods', function()
+  it('supports __add for class instances', function()
+    local Vec = class {
+      __init = function(self, x, y)
+        self.x, self.y = x, y
+      end,
+
+      __add = function(a, b)
+        return a.__class(a.x + b.x, a.y + b.y)
+      end,
+    }
+
+    local v1 = Vec(1, 2)
+    local v2 = Vec(3, 4)
+    local v3 = v1 + v2
+
+    assert.is_equal(v3.x, 4)
+    assert.is_equal(v3.y, 6)
+  end)
+
+  it('supports __eq for comparing instances', function()
+    local Point = class {
+      __init = function(self, x, y)
+        self.x, self.y = x, y
+      end,
+
+      __eq = function(a, b)
+        return a.x == b.x and a.y == b.y
+      end,
+    }
+
+    local p1 = Point(5, 10)
+    local p2 = Point(5, 10)
+    local p3 = Point(1, 1)
+
+    assert.is_true(p1 == p2)
+    assert.is_false(p1 == p3)
+  end)
+
+  it('supports __len for custom length', function()
+    local Bag = class {
+      __init = function(self, items)
+        self.items = items
+      end,
+
+      __len = function(self)
+        return #self.items
+      end,
+    }
+
+    local b = Bag { 'a', 'b', 'c' }
+    assert.is_equal(#b, 3)
+  end)
+
+  it('supports __tostring for readable output', function()
+    local Named = class {
+      __init = function(self, name)
+        self.name = name
+      end,
+
+      __tostring = function(self)
+        return '<Named: ' .. self.name .. '>'
+      end,
+    }
+
+    local obj = Named('Test')
+    assert.is_equal(tostring(obj), '<Named: Test>')
+  end)
+end)

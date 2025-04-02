@@ -32,6 +32,25 @@ local function isinstanceof(obj, cls)
     and (obj.__class == cls or (obj.__super ~= nil and isinstanceof(obj.__super, cls)))
 end
 
+-- Known metamethods to copy from classdef
+local known_metamethods = {
+  __add = true,
+  __sub = true,
+  __mul = true,
+  __div = true,
+  __mod = true,
+  __pow = true,
+  __unm = true,
+  __len = true,
+  __eq = true,
+  __lt = true,
+  __le = true,
+  __pairs = true,
+  __ipairs = true,
+  __call = true,
+  __tostring = true,
+}
+
 --- Internal: creates a new class.
 -- @param name string|nil: Optional class name.
 -- @param parentclass table|nil: Optional parent class.
@@ -63,25 +82,35 @@ local new_class_internal = function(name, parentclass, classdef)
       -- call superclass constructor
       local super = parentclass and cls.__parent:__create() or nil
 
-      -- create instance object and initialize it with
-      -- class-defined attributes
+      -- this instance's metatable
+      local meta = {
+        -- attributes not present in this instance will be
+        -- indexed from parent class instance
+        __index = super or nil,
+      }
+
+      -- create instance object and initialize it with class-defined attributes
+      -- also transfer metamethods to the instance's metatable
       local instance = {}
       for k, v in pairs(cls.__classdef) do
-        instance[k] = v
+        if known_metamethods[k] then
+          meta[k] = v
+        else
+          instance[k] = v
+        end
       end
 
       instance.__super = super
       instance.__class = cls
 
-      local instanceid = tostring(instance)
-      local tostringfn = function()
-        return '<object of ' .. tostring(cls) .. ': ' .. instanceid .. '>'
+      -- provide __tostring impl if not defined by user
+      if not meta.__tostring then
+        meta.__tostring = function(_)
+          return '<object of ' .. tostring(cls) .. ': ' .. tostring(meta) .. '>'
+        end
       end
 
-      -- attributes not present in this instance will be
-      -- indexed from parent class instance
-      return super and setmetatable(instance, { __index = super, __tostring = tostringfn })
-        or setmetatable(instance, { __tostring = tostringfn })
+      return super and setmetatable(instance, meta) or setmetatable(instance, meta)
     end,
   }
 
