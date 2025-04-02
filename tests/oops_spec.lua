@@ -344,6 +344,34 @@ describe('inheritance and dispatch', function()
     o:method()
     assert.is_equal(o.x, 6)
   end)
+
+  it('mutation in descendant is reflected on ancestor', function()
+    local C1 = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+
+      get = function(self)
+        return self.x
+      end,
+
+      mutate = function(self)
+        self.x = self.x - 1
+      end,
+    }
+
+    local C2 = class(C1) {
+      mutate = function(self)
+        self.__super:mutate()
+        self.x = self.x + 2
+      end,
+    }
+
+    local o2 = C2(5)
+    assert.is_equal(o2:get(), 5)
+    o2:mutate()
+    assert.is_equal(o2:get(), 6)
+  end)
 end)
 
 describe('inspection features', function()

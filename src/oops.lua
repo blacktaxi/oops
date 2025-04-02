@@ -88,6 +88,7 @@ local new_class_internal = function(name, parentclass, classdef)
         -- attributes not present in this instance will be
         -- indexed from parent class instance
         __index = super or nil,
+        __newindex = super or nil,
       }
 
       -- create instance object and initialize it with class-defined attributes
@@ -106,8 +107,9 @@ local new_class_internal = function(name, parentclass, classdef)
 
       -- provide __tostring impl if not defined by user
       if not meta.__tostring then
+        local instanceid = tostring(instance)
         meta.__tostring = function(_)
-          return '<object of ' .. tostring(cls) .. ': ' .. tostring(meta) .. '>'
+          return '<object of ' .. tostring(cls) .. ': ' .. instanceid .. '>'
         end
       end
 
