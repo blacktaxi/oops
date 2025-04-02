@@ -651,71 +651,196 @@ describe('class class fields', function()
 end)
 
 describe('metamethods', function()
-  it('supports __add for class instances', function()
-    local Vec = class {
-      __init = function(self, x, y)
-        self.x, self.y = x, y
+  it('__add works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
       end,
-
       __add = function(a, b)
-        return a.__class(a.x + b.x, a.y + b.y)
+        return a.__class(a.x + b.x)
       end,
     }
-
-    local v1 = Vec(1, 2)
-    local v2 = Vec(3, 4)
-    local v3 = v1 + v2
-
-    assert.is_equal(v3.x, 4)
-    assert.is_equal(v3.y, 6)
+    assert.is_equal((V(1) + V(2)).x, 3)
   end)
 
-  it('supports __eq for comparing instances', function()
-    local Point = class {
-      __init = function(self, x, y)
-        self.x, self.y = x, y
+  it('__sub works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
       end,
+      __sub = function(a, b)
+        return a.__class(a.x - b.x)
+      end,
+    }
+    assert.is_equal((V(5) - V(3)).x, 2)
+  end)
 
+  it('__mul works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+      __mul = function(a, b)
+        return a.__class(a.x * b.x)
+      end,
+    }
+    assert.is_equal((V(3) * V(4)).x, 12)
+  end)
+
+  it('__div works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+      __div = function(a, b)
+        return a.__class(a.x / b.x)
+      end,
+    }
+    assert.is_true(math.abs((V(10) / V(4)).x - 2.5) < 0.001)
+  end)
+
+  it('__mod works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+      __mod = function(a, b)
+        return a.__class(a.x % b.x)
+      end,
+    }
+    assert.is_equal((V(10) % V(3)).x, 1)
+  end)
+
+  it('__pow works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+      __pow = function(a, b)
+        return a.__class(a.x ^ b.x)
+      end,
+    }
+    assert.is_equal((V(2) ^ V(3)).x, 8)
+  end)
+
+  it('__unm works', function()
+    local V = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+      __unm = function(a)
+        return a.__class(-a.x)
+      end,
+    }
+    assert.is_equal((-V(5)).x, -5)
+  end)
+
+  it('__eq works', function()
+    local P = class {
+      __init = function(self, x)
+        self.x = x
+      end,
       __eq = function(a, b)
-        return a.x == b.x and a.y == b.y
+        return a.x == b.x
       end,
     }
-
-    local p1 = Point(5, 10)
-    local p2 = Point(5, 10)
-    local p3 = Point(1, 1)
-
-    assert.is_true(p1 == p2)
-    assert.is_false(p1 == p3)
+    assert.is_true(P(1) == P(1))
+    assert.is_false(P(1) == P(2))
   end)
 
-  it('supports __len for custom length', function()
-    local Bag = class {
-      __init = function(self, items)
-        self.items = items
+  it('__lt works', function()
+    local P = class {
+      __init = function(self, x)
+        self.x = x
       end,
+      __lt = function(a, b)
+        return a.x < b.x
+      end,
+    }
+    assert.is_true(P(1) < P(2))
+  end)
 
+  it('__le works', function()
+    local P = class {
+      __init = function(self, x)
+        self.x = x
+      end,
+      __le = function(a, b)
+        return a.x <= b.x
+      end,
+    }
+    assert.is_true(P(1) <= P(2))
+    assert.is_true(P(2) <= P(2))
+  end)
+
+  it('__len works', function()
+    local L = class {
+      __init = function(self, xs)
+        self.xs = xs
+      end,
       __len = function(self)
-        return #self.items
+        return #self.xs
       end,
     }
-
-    local b = Bag { 'a', 'b', 'c' }
-    assert.is_equal(#b, 3)
+    assert.is_equal(#L { 1, 2, 3 }, 3)
   end)
 
-  it('supports __tostring for readable output', function()
-    local Named = class {
+  it('__tostring works', function()
+    local T = class {
+      __init = function(self, label)
+        self.label = label
+      end,
+      __tostring = function(self)
+        return 'Label: ' .. self.label
+      end,
+    }
+    assert.is_equal(tostring(T('foo')), 'Label: foo')
+  end)
+
+  it('__pairs works', function()
+    local M = class {
+      __init = function(self)
+        self.data = { a = 1, b = 2 }
+      end,
+      __pairs = function(self)
+        return pairs(self.data)
+      end,
+    }
+    local keys = {}
+    for k in pairs(M()) do
+      keys[k] = true
+    end
+    assert.is_true(keys.a and keys.b)
+  end)
+
+  if tonumber(_VERSION:match('Lua (%d+%.%d+)')) < 5.3 then
+    it('__ipairs works', function()
+      local A = class {
+        __init = function(self)
+          self.items = { 10, 20, 30 }
+        end,
+        __ipairs = function(self)
+          return ipairs(self.items)
+        end,
+      }
+      local sum = 0
+      for _, v in ipairs(A()) do
+        sum = sum + v
+      end
+      assert.is_equal(sum, 60)
+    end)
+  end
+
+  it('__call works', function()
+    local Callable = class {
       __init = function(self, name)
         self.name = name
       end,
-
-      __tostring = function(self)
-        return '<Named: ' .. self.name .. '>'
+      __call = function(self, x)
+        return self.name .. x
       end,
     }
-
-    local obj = Named('Test')
-    assert.is_equal(tostring(obj), '<Named: Test>')
+    local f = Callable('Hi ')
+    assert.is_equal(f('there'), 'Hi there')
   end)
 end)
