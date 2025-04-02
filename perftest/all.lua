@@ -176,7 +176,7 @@ local benchmarks = {
     name = 'Static field read',
     action = function()
       local C = class {
-        __static = {
+        __class = {
           foo = 42,
         },
       }
@@ -189,7 +189,7 @@ local benchmarks = {
     name = 'Static field write',
     action = function()
       local C = class {
-        __static = {
+        __class = {
           foo = 0,
         },
       }
@@ -202,7 +202,7 @@ local benchmarks = {
     name = 'Inherited static field read',
     action = function()
       local Base = class {
-        __static = {
+        __class = {
           shared = 'hello',
         },
       }
@@ -216,7 +216,7 @@ local benchmarks = {
     name = 'Static method call',
     action = function()
       local C = class {
-        __static = {
+        __class = {
           hello = function(cls)
             return 'hi'
           end,
@@ -231,7 +231,7 @@ local benchmarks = {
     name = 'Inherited static method call',
     action = function()
       local A = class {
-        __static = {
+        __class = {
           ping = function(cls)
             return 'pong'
           end,

@@ -414,7 +414,7 @@ describe('inspection features', function()
   end)
 end)
 
-describe('class class fields', function()
+describe('class fields', function()
   it('supports class fields via __class', function()
     local C = class {
       __class = {
