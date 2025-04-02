@@ -123,8 +123,10 @@ local Vector = class {
     self.x, self.y = x, y
   end,
 
-  __add = function(a, b)
-    return Vector(a.x + b.x, a.y + b.y)
+  __add = function(self, other)
+    -- note how we're using self.__class to create a new Vector instance, since the
+    -- local Vector is not yet defined
+    return self.__class(self.x + other.x, self.y + other.y)
   end,
 
   __eq = function(a, b)
