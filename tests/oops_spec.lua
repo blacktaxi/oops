@@ -440,6 +440,21 @@ describe('class fields', function()
     assert.is_equal(C:get_version(), '1.0')
   end)
 
+  it('supports calling class method from __init', function()
+    local C = class {
+      __init = function(self)
+        self.version = self.__class:get_version()
+      end,
+      __class = {
+        get_version = function(_)
+          return '1.0'
+        end,
+      },
+    }
+
+    assert.is_equal(C:get_version(), '1.0')
+  end)
+
   it('does not copy class fields to instances', function()
     local C = class {
       __class = {
