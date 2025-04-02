@@ -813,7 +813,9 @@ describe('metamethods', function()
     assert.is_true(keys.a and keys.b)
   end)
 
-  if tonumber(_VERSION:match('Lua (%d+%.%d+)')) < 5.3 then
+  ---@diagnostic disable-next-line: undefined-global
+  if tonumber(_VERSION:match('Lua (%d+%.%d+)')) < 5.3 and type(jit) ~= 'table' then
+    -- only supported on PUC Lua < 5.3
     it('__ipairs works', function()
       local A = class {
         __init = function(self)

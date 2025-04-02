@@ -5,6 +5,7 @@ globals = {
   'describe',
   'it',
   'assert', -- for busted
+  'jit',
 }
 
 ignore = {
