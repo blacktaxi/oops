@@ -113,10 +113,6 @@ print("Sub value:", Sub.value)          --> 1
 
 Metamethod support:
 
-oops supports custom metamethods out of the box — just define them in your class table.
-
-This enables operator overloading, custom printing, comparisons, and more:
-
 ```lua
 local Vector = class {
   __init = function(self, x, y)
