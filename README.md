@@ -30,6 +30,8 @@ Oops is a lightweight, expressive, [class-based](http://en.wikipedia.org/wiki/Cl
 - Classes as expressions (classes can be anonymous and/or defined and used on the spot).
 - Controlled visibility scope: classes don't have to be global.
 - Concise syntax: `local Class = class { hello = function (self) print('world!') end }`.
+- Class fields and methods (a-la Python)
+- Custom metamethod support
 
 ## Use
 
@@ -109,6 +111,41 @@ print("Counter value:", Counter.value)  --> 2
 print("Sub value:", Sub.value)          --> 1
 ```
 
+Metamethod support:
+
+oops supports custom metamethods out of the box — just define them in your class table.
+
+This enables operator overloading, custom printing, comparisons, and more:
+
+```lua
+local Vector = class {
+  __init = function(self, x, y)
+    self.x, self.y = x, y
+  end,
+
+  __add = function(a, b)
+    return Vector(a.x + b.x, a.y + b.y)
+  end,
+
+  __eq = function(a, b)
+    return a.x == b.x and a.y == b.y
+  end,
+
+  __tostring = function(self)
+    return "(" .. self.x .. ", " .. self.y .. ")"
+  end,
+}
+
+local a = Vector(1, 2)
+local b = Vector(3, 4)
+local c = a + b
+
+print(c)        --> (4, 6)
+print(a == b)   --> false
+```
+
+> ⚠️ Note: \_\_ipairs is not supported in Lua 5.3 and later (use regular iterator methods instead).
+
 For more examples see [`examples/](./examples).
 
 ## Development
@@ -127,7 +164,6 @@ make perf
 
 ## To do
 
-- custom metamethods (operator methods)
 - compare with other OOP libraries
 
 ## License
