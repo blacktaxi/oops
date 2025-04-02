@@ -1,6 +1,9 @@
 local class = require('oops')
 local _ = require('moses')
 
+---@diagnostic disable-next-line: undefined-global
+local is_luajit = (jit ~= nil)
+
 describe('base class functionality', function()
   it('anonymous class can be created', function()
     local C = class {}
@@ -773,18 +776,6 @@ describe('metamethods', function()
     assert.is_true(P(2) <= P(2))
   end)
 
-  it('__len works', function()
-    local L = class {
-      __init = function(self, xs)
-        self.xs = xs
-      end,
-      __len = function(self)
-        return #self.xs
-      end,
-    }
-    assert.is_equal(#L { 1, 2, 3 }, 3)
-  end)
-
   it('__tostring works', function()
     local T = class {
       __init = function(self, label)
@@ -797,40 +788,57 @@ describe('metamethods', function()
     assert.is_equal(tostring(T('foo')), 'Label: foo')
   end)
 
-  it('__pairs works', function()
-    local M = class {
-      __init = function(self)
-        self.data = { a = 1, b = 2 }
-      end,
-      __pairs = function(self)
-        return pairs(self.data)
-      end,
-    }
-    local keys = {}
-    for k in pairs(M()) do
-      keys[k] = true
-    end
-    assert.is_true(keys.a and keys.b)
-  end)
+  -- LuaJIT doesn't support these metamethods
+  if not is_luajit then
+    -- only added in 5.2
+    if tonumber(_VERSION:match('Lua (%d+%.%d+)')) > 5.1 then
+      it('__len works', function()
+        local L = class {
+          __init = function(self, xs)
+            self.xs = xs
+          end,
+          __len = function(self)
+            return #self.xs
+          end,
+        }
+        assert.is_equal(#L { 1, 2, 3 }, 3)
+      end)
 
-  ---@diagnostic disable-next-line: undefined-global
-  if tonumber(_VERSION:match('Lua (%d+%.%d+)')) < 5.3 and type(jit) ~= 'table' then
-    -- only supported on PUC Lua < 5.3
-    it('__ipairs works', function()
-      local A = class {
-        __init = function(self)
-          self.items = { 10, 20, 30 }
-        end,
-        __ipairs = function(self)
-          return ipairs(self.items)
-        end,
-      }
-      local sum = 0
-      for _, v in ipairs(A()) do
-        sum = sum + v
+      it('__pairs works', function()
+        local M = class {
+          __init = function(self)
+            self.data = { a = 1, b = 2 }
+          end,
+          __pairs = function(self)
+            return pairs(self.data)
+          end,
+        }
+        local keys = {}
+        for k in pairs(M()) do
+          keys[k] = true
+        end
+        assert.is_true(keys.a and keys.b)
+      end)
+
+      if tonumber(_VERSION:match('Lua (%d+%.%d+)')) < 5.3 then
+        -- only supported on PUC Lua < 5.3
+        it('__ipairs works', function()
+          local A = class {
+            __init = function(self)
+              self.items = { 10, 20, 30 }
+            end,
+            __ipairs = function(self)
+              return ipairs(self.items)
+            end,
+          }
+          local sum = 0
+          for _, v in ipairs(A()) do
+            sum = sum + v
+          end
+          assert.is_equal(sum, 60)
+        end)
       end
-      assert.is_equal(sum, 60)
-    end)
+    end
   end
 
   it('__call works', function()
