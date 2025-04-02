@@ -853,4 +853,26 @@ describe('metamethods', function()
     local f = Callable('Hi ')
     assert.is_equal(f('there'), 'Hi there')
   end)
+
+  it('__concat works', function()
+    local Phrase = class {
+      __init = function(self, text)
+        self.text = text
+      end,
+
+      __concat = function(a, b)
+        return a.__class(a.text .. ' ' .. b.text)
+      end,
+
+      __tostring = function(self)
+        return self.text
+      end,
+    }
+
+    local a = Phrase('hello')
+    local b = Phrase('world')
+    local c = a .. b
+
+    assert.is_equal(tostring(c), 'hello world')
+  end)
 end)

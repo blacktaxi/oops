@@ -49,6 +49,7 @@ local known_metamethods = {
   __ipairs = true,
   __call = true,
   __tostring = true,
+  __concat = true,
 }
 
 --- Internal: creates a new class.
