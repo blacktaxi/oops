@@ -5,7 +5,10 @@
       "type": "lua-local",
       "request": "launch",
       "name": "Debug current file",
-      "program": "${file}"
+      "program": {
+        "lua": "lua",
+        "file": "${file}"
+      }
     }
   ]
 }
