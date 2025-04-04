@@ -117,14 +117,14 @@ local new_class_internal = function(name, parentclass, classdef)
     end,
   }
 
-  -- inherit class fields from parent
-  if parentclass and parentclass.__class_fields then
+  -- inherit class fields from parent if present
+  local parent_index = parentclass and getmetatable(parentclass).__index
+
+  if parent_index then
   class_fields = setmetatable(class_fields, {
-      __index = parentclass.__class_fields,
+      __index = parent_index,
   })
   end
-
-  class.__class_fields = class_fields
 
   -- Assign class name.
   class.__name = name or (tostring(class))
