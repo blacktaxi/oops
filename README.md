@@ -27,11 +27,12 @@ Oops is a lightweight, expressive, [class-based](http://en.wikipedia.org/wiki/Cl
 ## Features
 
 - Class-based single inheritance: class is a factory of objects (instances).
-- Classes as expressions (classes can be anonymous and/or defined and used on the spot).
+- Classes as expressions (classes can be anonymous, and defined and used on the spot).
 - Controlled visibility scope: classes don't have to be global.
 - Concise syntax: `local Class = class { hello = function (self) print('world!') end }`.
 - Class fields and methods (a-la Python)
-- Custom metamethod support
+- Full metamethod support with inheritance (operator overloading)
+- Minimal runtime overhead
 
 ## Use
 
