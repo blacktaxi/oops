@@ -918,4 +918,25 @@ describe('metamethods', function()
 
     assert.is_equal(tostring(c), 'hello world')
   end)
+
+  it('allows to inherit metamethod impl', function()
+    local A = class {
+      __init = function(self, x)
+        self.val = x
+      end,
+      __add = function(self, other)
+        return self.__class(self.val + other.val)
+      end,
+    }
+
+    local B = class(A) {}
+
+    assert.is_equal((A(5) + A(5)).val, 10)
+    assert.is_equal((B(5) + B(5)).val, 10)
+    assert.is_equal((A(5) + B(5)).val, 10)
+  end)
+
+  it('does not set empty metatables for class __index', function()
+    assert.is_nil(getmetatable(getmetatable(class {}).__index))
+  end)
 end)

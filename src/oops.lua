@@ -118,9 +118,11 @@ local new_class_internal = function(name, parentclass, classdef)
   }
 
   -- inherit class fields from parent
+  if parentclass and parentclass.__class_fields then
   class_fields = setmetatable(class_fields, {
-    __index = parentclass and parentclass.__class_fields or nil,
+      __index = parentclass.__class_fields,
   })
+  end
 
   class.__class_fields = class_fields
 
