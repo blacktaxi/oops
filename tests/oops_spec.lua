@@ -939,4 +939,41 @@ describe('metamethods', function()
   it('does not set empty metatables for class __index', function()
     assert.is_nil(getmetatable(getmetatable(class {}).__index))
   end)
+
+  it('metamethod impl in child overrides parent impl', function()
+    local A = class {
+      __call = function()
+        return 'A'
+      end,
+    }
+
+    local B = class(A) {}
+
+    local C = class(A) {
+      __call = function()
+        return 'C'
+      end,
+    }
+
+    local D = class(B) {
+      __call = function()
+        return 'D'
+      end,
+    }
+
+    local E = class(C) {
+      __call = function()
+        return 'E'
+      end,
+    }
+
+    local F = class(B) {}
+
+    assert.is_equal(A()(), 'A')
+    assert.is_equal(B()(), 'A')
+    assert.is_equal(C()(), 'C')
+    assert.is_equal(D()(), 'D')
+    assert.is_equal(E()(), 'E')
+    assert.is_equal(F()(), 'A')
+  end)
 end)

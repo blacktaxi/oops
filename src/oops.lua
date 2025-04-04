@@ -102,6 +102,15 @@ local new_class_internal = function(name, parentclass, classdef)
         end
       end
 
+      -- copy metamethods from parent instance
+      if super then
+        for k, v in pairs(getmetatable(super)) do
+          if known_metamethods[k] and not meta[k] then
+            meta[k] = v
+          end
+        end
+      end
+
       instance.__super = super
       instance.__class = cls
 
@@ -120,9 +129,9 @@ local new_class_internal = function(name, parentclass, classdef)
   local parent_index = parentclass and getmetatable(parentclass).__index
 
   if parent_index then
-  class_fields = setmetatable(class_fields, {
+    class_fields = setmetatable(class_fields, {
       __index = parent_index,
-  })
+    })
   end
 
   -- Assign class name.
