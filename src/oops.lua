@@ -4,28 +4,60 @@
 -- @author Serhii Yavnyi <blacktaxi@gmail.com>
 -- @license BSD
 
+---@module "oops"
+---@class OopsModule
+---@field isclass fun(x: any): boolean
+---@field isobject fun(x: any): boolean
+---@field isinstanceof fun(obj: any, cls: any): boolean
+---@field class fun(parent: OopsClass): fun(def: table): OopsClass
+---@overload fun(name: string): fun(def: table): OopsClass
+---@overload fun(name: string, parent: OopsClass): fun(def: table): OopsClass
+---@overload fun(def: table): OopsClass
+---@operator call: fun(parent: OopsClass): fun(def: table): OopsClass
+---@overload fun(name: string): fun(def: table): OopsClass
+---@overload fun(name: string, parent: OopsClass): fun(def: table): OopsClass
+---@overload fun(def: table): OopsClass
+
+---@generic T: OopsInstance
+---@class OopsInstance<T>
+---@field __super? T
+---@field __class OopsClass<T>
+---@field __init? fun(self: T, ...: any)
+
+---@generic T: OopsInstance
+---@class OopsClass<T>
+---@field __classdef table
+---@field __create fun(self: OopsClass<T>): T
+---@field __name string
+---@field __parent? OopsClass<any>
+---@operator call: fun(...: any): T
+
 --- Checks whether a value is a class created by `oops`.
--- @param x any: The value to check.
--- @return boolean: `true` if `x` is a class, `false` otherwise.
+---@param x any # The value to check.
+---@return boolean # True if x is a class created by `oops`
 local isclass = function(x)
   return type(x) == 'table' and type(x.__classdef) == 'table'
 end
 
 --- Checks whether a value is an instance of a class.
--- @param x any: The value to check.
--- @return boolean: `true` if `x` is an object created via a class, `false` otherwise.
+---@param x any # The value to check.
+---@return boolean # True if x is an object created by a class
 local isobject = function(x)
   return type(x) == 'table' and isclass(x.__class)
 end
 
 --- Checks whether an object is an instance of a given class or one of its ancestors.
--- @param obj table: The object to test.
--- @param cls table: The class to check against.
--- @return boolean: `true` if `obj` is an instance of `cls` or its parent, `false` otherwise.
--- @usage
+--
+-- Usage:
+-- ```lua
 -- local A = class { }
 -- local a = A()
 -- assert(isinstanceof(a, A))
+-- ```
+--
+---@param obj table # The object to test.
+---@param cls table # The class to check against.
+---@return boolean # True if obj is an instance of cls or its ancestor
 local function isinstanceof(obj, cls)
   return isobject(obj)
     and isclass(cls)
@@ -33,6 +65,7 @@ local function isinstanceof(obj, cls)
 end
 
 -- Known metamethods to copy from classdef
+---@type table<string, boolean>
 local known_metamethods = {
   __add = true,
   __sub = true,
@@ -52,11 +85,11 @@ local known_metamethods = {
   __concat = true,
 }
 
---- Internal: creates a new class.
--- @param name string|nil: Optional class name.
--- @param parentclass table|nil: Optional parent class.
--- @param classdef table: Table containing instance methods and special keys (e.g. `__init`, `__class`).
--- @return table: A new class.
+---@private
+---@param name? string # Optional class name.
+---@param parentclass? OopsClass # Optional parent class.
+---@param classdef? table # Class definition table containing instance methods and special keys (e.g. `__init`, `__class`).
+---@return OopsClass
 local new_class_internal = function(name, parentclass, classdef)
   -- typecheck arguments
   assert(
@@ -169,13 +202,10 @@ end
 -- local Derived = class("Derived", BaseClass) { ... }
 -- ```
 --
--- @usage anon_class = class { <classdef>... }
--- @usage Class = class("Class") { <classdef>... }
--- @usage anon_class = class(ParentClass) { <classdef>... }
--- @usage anon_class = class(nil, ParentClass) { <classdef>... }
--- @usage Class = class("Class", ParentClass) { <classdef>... }
--- @param ... string|table|nil: Class name, parent class, or class definition.
--- @return function|table: Returns a function that accepts the class definition, or the class itself.
+---@overload fun(def: table): OopsClass
+---@overload fun(name: string): fun(def: table): OopsClass
+---@overload fun(parent: OopsClass): fun(def: table): OopsClass
+---@overload fun(name: string, parent: OopsClass): fun(def: table): OopsClass
 local class = function(...)
   local arg_count = select('#', ...)
   if arg_count == 1 then
@@ -217,6 +247,7 @@ local class = function(...)
   end
 end
 
+---@type OopsModule
 local MODULE = {
   class = class,
   isclass = isclass,
