@@ -76,9 +76,7 @@ function love.load()
         local mass = hitter.body:getMass()
         local factor = 0.1
 
-        -- hitter.body:setLinearVelocity(vx, vy - 350) -- give it a small boost
         hitter.body:applyLinearImpulse(vx * factor * mass, vy * factor * mass)
-        print('BOOP')
       end
     end
   end)

@@ -143,8 +143,6 @@ print(c)        --> (4, 6)
 print(a == b)   --> false
 ```
 
-> ⚠️ Note: \_\_ipairs is not supported in Lua 5.3 and later (use regular iterator methods instead).
-
 For more examples see [`examples/](./examples).
 
 ## Development
@@ -163,7 +161,7 @@ make perf
 
 ## To do
 
-- compare with other OOP libraries
+- compare with similar libraries
 
 ## License
 
