@@ -16,7 +16,9 @@ description = {
     It supports:
     - Concise inline class definitions
     - Anonymous and local classes
-    - Single inheritance with superclass constructor calls
+    - Single inheritance with superclass member access
+    - Class fields/methods
+    - Metamethods with inheritance
 
     Oops is fast and minimal — the simplest class is just a table with an initializer.
     It's designed to be easy to use, easy to extend, and suitable for both scripting

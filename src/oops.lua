@@ -1,8 +1,8 @@
 --- Lightweight class-based OOP for Lua with concise syntax and local classes.
+-- @module oops
 -- @release 0.2
--- @class module
--- @name oops
 -- @author Serhii Yavnyi <blacktaxi@gmail.com>
+-- @license BSD
 
 --- Checks whether a value is a class created by `oops`.
 -- @param x any: The value to check.
