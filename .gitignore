@@ -1,0 +1,39 @@
+# Compiled Lua bytecode
+*.luac
+
+# LuaRocks build output
+*.rock
+*.rockspec~
+luarocks.lock
+.install
+.libs/
+bin/
+lib/
+
+# Local LuaRocks tree (if used with --local)
+.local/
+lua_modules/
+lib/luarocks/
+lib/lua/
+lib64/
+
+# Test output
+test/output/
+.coverage/
+
+# Logs and cache
+*.log
+*.out
+
+# Stylua cache
+.stylua.toml.cache
+
+# Editor and system files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# GitHub Actions artifacts (if any)
+.github/workflows/*.log

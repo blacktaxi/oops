@@ -1,72 +1,76 @@
-local class = require 'oops'
+local class = require('oops')
 
--- Simplest class. No methods, no constructor, no inheritance.
-local Creature = class { }
+-- Smallest possible class.
+local Creature = class {}
 
--- Inheritance, constructor.
+-- Inherits from Creature, adds name via constructor
 local Human = class(Creature) {
-  __init = function (self, name)
+  __init = function(self, name)
     self.name = name
-  end
+  end,
 }
 
--- Abstract method.
-local TalkingHuman = class(Human) {
-  talk = abstract_method
+-- Abstract base class for "talking" creatures
+local TalkingCreature = class(Human) {
+  talk = function()
+    error('Not implemented')
+  end,
 }
 
--- Calling superclass constructor, overriding inherited method.
-local Scientist = class(TalkingHuman) {
-  __init = function (self, name, discovery)
+-- Scientist overrides talk
+local Scientist = class(TalkingCreature) {
+  __init = function(self, name, discovery)
+    -- calling superclass constructor
     self.__super:__init(name)
     self.discovery = discovery
   end,
 
-  talk = function (self)
-    return 'It is a scientific fact that ' .. self.discovery .. '.'
-  end
+  -- overriding inherited method
+  talk = function(self)
+    return "It's a scientific fact that " .. self.discovery .. '.'
+  end,
 }
 
--- Overriding.
-local Zombie = class(TalkingHuman) {
-  talk = function (self) return 'Mmmrhrhgmhmmm...' end
+-- Kitten talks in adorable gibberish
+local Kitten = class(TalkingCreature) {
+  talk = function(self)
+    return 'Miao!'
+  end,
 }
 
--- Interacting with other objects.
-local Journalist = class(TalkingHuman) {
-  __init = function (self, name, interviewee)
+-- Storyteller interviews another talking creature
+local Storyteller = class(TalkingCreature) {
+  __init = function(self, name, companion)
     self.__super:__init(name)
-    self.interviewee = interviewee
+    self.companion = companion
   end,
 
-  talk = function (self)
-    return 'According to ' .. self.interviewee.name .. ', "' ..
-      self.interviewee:talk() .. '."'
-  end
+  talk = function(self)
+    return 'I once heard from ' .. self.companion.name .. ': "' .. self.companion:talk() .. '"'
+  end,
 }
 
--- array of objects
-local people = { 
-  Scientist('John von Neumann', 
-    'a von Neumann algebra or W*-algebra is a *-algebra of bounded' .. 
-    ' operators on a Hilbert space that is closed in the weak operator' .. 
-    ' topology and contains the identity operator.'),
-
-  Zombie('Victor Tsoi'),
-
-  -- Declaring and instantiating an anonymous class at the same time.
-  Journalist('Michael Moore',
-    (class(TalkingHuman) { 
-      talk = function (self) return '2 + 2 = 5' end 
-    })('Emmanuel Goldstein'))
+-- Collection of polymorphic characters
+local characters = {
+  Scientist('John von Neumann', 'quantum entanglement is real'),
+  Kitten('Murzyk Vasyliovych'),
+  Storyteller(
+    'Aesop',
+    -- anonymous class instantiation
+    (class(TalkingCreature) {
+      talk = function(self)
+        return 'Even the smallest voice can tell the biggest truth.'
+      end,
+    })('The Tiny Owl')
+  ),
 }
 
-local interview = function (who)
-  -- dynamic dispatch
+-- Interview helper
+local function interview(who)
   print(who.name .. ' says: ' .. who:talk())
 end
 
--- interview them all.
-for _, v in pairs(people) do
-  interview(v)
+-- Run the polymorphic demo
+for _, c in ipairs(characters) do
+  interview(c)
 end
