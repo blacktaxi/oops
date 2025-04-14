@@ -88,7 +88,7 @@ local known_metamethods = {
 ---@private
 ---@param name? string # Optional class name.
 ---@param parentclass? OopsClass # Optional parent class.
----@param classdef? table # Class definition table containing instance methods and special keys (e.g. `__init`, `__class`).
+---@param classdef? table # Class definition table.
 ---@return OopsClass
 local new_class_internal = function(name, parentclass, classdef)
   -- typecheck arguments
