@@ -11,6 +11,7 @@ local Ball = class('Ball', PhysicsObject) {
     self.shape = love.physics.newCircleShape(12)
     self.fixture = love.physics.newFixture(self.body, self.shape)
     self.fixture:setRestitution(1)
+    self.fixture:setDensity(1)
     self.fixture:setUserData(self)
 
     self.body:setBullet(true) -- prevent tunneling

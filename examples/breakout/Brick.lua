@@ -53,9 +53,9 @@ local Brick = class('Brick', PhysicsObject) {
       local offsetY = 50
 
       for row = 1, rows do
-        for col = 1, cols do
-          local x = offsetX + (col - 1) * (brickWidth + padding) + brickWidth / 2
-          local y = offsetY + (row - 1) * (brickHeight + padding) + brickHeight / 2
+        for col = 1, cols - 2 do
+          local x = offsetX + col * (brickWidth + padding) + brickWidth / 2
+          local y = offsetY + row * (brickHeight + padding) + brickHeight / 2
           table.insert(bricks, cls(world, x, y, brickWidth, brickHeight))
         end
       end

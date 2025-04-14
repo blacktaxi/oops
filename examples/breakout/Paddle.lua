@@ -9,6 +9,7 @@ local Paddle = class('Paddle', PhysicsObject) {
 
     self.fixture:setRestitution(1)
     self.fixture:setFriction(0)
+    self.fixture:setUserData(self)
   end,
 
   update = function(self, dt)

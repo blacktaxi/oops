@@ -7,6 +7,7 @@ local Wall = class('Wall', PhysicsObject) {
     self.color = { 0.3, 0.3, 0.4 }
     self.fixture:setRestitution(1)
     self.fixture:setFriction(0)
+    self.fixture:setUserData(self)
   end,
 
   draw = function(self)

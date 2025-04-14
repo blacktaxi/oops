@@ -1,4 +1,5 @@
 package.path = 'src/?.lua;' .. package.path
+local class = require('oops')
 
 -- Global physics world
 local world
@@ -32,16 +33,17 @@ function love.load()
   love.window.setTitle('Breakout with Physics + OOP')
 
   world = love.physics.newWorld(0, 0, true)
-  world:setGravity(0, 500)
+  world:setGravity(0, 800)
 
   -- Load class modules (we’ll define these soon)
-  PhysicsObject = require('PhysicsObject')
-  Paddle = require('Paddle')
-  Ball = require('Ball')
-  Brick = require('Brick')
-  Wall = require('Wall')
+  local Paddle = require('Paddle')
+  local Ball = require('Ball')
+  local Brick = require('Brick')
+  local Wall = require('Wall')
+  local SpringPaddle = require('SpringPaddle')
 
   -- Create world elements
+  -- objects.paddle = SpringPaddle(world, 400, 550, 120, 20)
   objects.paddle = Paddle(world, 400, 580)
   objects.ball = Ball(world, objects, 400, 550)
   objects.walls = Wall:createBounds(world, 800, 600)
@@ -59,14 +61,24 @@ function love.load()
       { objB, objA },
     } do
       local hitter, target = pair[1], pair[2]
-      -- print('collided', hitter, target)
-      if target and target.__class.__name == 'Brick' then
+
+      if target and class.isinstanceof(target, Brick) then
         target:destroy()
       end
 
-      if hitter.__class.__name == 'Ball' and target.__class.__name == 'Paddle' then
+      if
+        hitter
+        and class.isinstanceof(hitter, Ball)
+        and target
+        and (class.isinstanceof(target, Paddle) or class.isinstanceof(target, Wall))
+      then
         local vx, vy = hitter.body:getLinearVelocity()
-        hitter.body:setLinearVelocity(vx, vy - 150) -- give it a small boost
+        local mass = hitter.body:getMass()
+        local factor = 0.1
+
+        -- hitter.body:setLinearVelocity(vx, vy - 350) -- give it a small boost
+        hitter.body:applyLinearImpulse(vx * factor * mass, vy * factor * mass)
+        print('BOOP')
       end
     end
   end)
@@ -111,9 +123,11 @@ function love.draw()
   if objects.paddle then
     objects.paddle:draw()
   end
+
   if objects.ball then
     objects.ball:draw()
   end
+
   if objects.bricks then
     for _, b in ipairs(objects.bricks) do
       b:draw()
