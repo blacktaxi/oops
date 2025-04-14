@@ -53,8 +53,8 @@ perf:
 .PHONY: publish
 publish: lint test check-examples build-test
 	@echo "📦 Validating and uploading rockspec..."
-	luarocks lint $(ROCKSPEC)
-	luarocks upload $(ROCKSPEC)
+	@luarocks lint $(ROCKSPEC)
+	@luarocks upload $(ROCKSPEC) --api-key=${LUAROCKS_API_KEY}
 
 .PHONY: clean
 clean:
