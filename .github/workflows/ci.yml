@@ -38,7 +38,7 @@ jobs:
         if: matrix.lua == '5.4'
         uses: codecov/codecov-action@v4
         with:
-          files: ./luacov.report.out
+          files: ./cobertura.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false

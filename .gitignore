@@ -25,6 +25,9 @@ test/output/
 *.log
 *.out
 
+# Coverage reports
+cobertura.xml
+
 # Stylua cache
 .stylua.toml.cache
 
