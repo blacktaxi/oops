@@ -30,8 +30,11 @@ check-coverage:
 build-test:
 	@echo "🏗️ Building and installing the local library..."
 	luarocks make $(ROCKSPEC)
-	@echo "🧪 Running tests with the installed library..."
-	busted $(TESTS)
+	@echo "🧪 Running tests with coverage on the installed library..."
+	busted --coverage $(TESTS)
+	@echo "📊 Checking coverage threshold..."
+	@luacov > /dev/null
+	@lua scripts/check_coverage.lua $(COVERAGE_THRESHOLD)
 
 .PHONY: check-examples
 check-examples:
