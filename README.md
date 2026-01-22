@@ -1,6 +1,6 @@
 # Oops
 
-[![Build](https://github.com/blacktaxi/oops/actions/workflows/ci.yml/badge.svg)](https://github.com/blacktaxi/oops/actions/workflows/ci.yml) [![LuaRocks](https://img.shields.io/luarocks/v/blacktaxi/oops.svg)](https://luarocks.org/modules/blacktaxi/oops) [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
+[![Build](https://github.com/blacktaxi/oops/actions/workflows/ci.yml/badge.svg)](https://github.com/blacktaxi/oops/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/blacktaxi/oops/graph/badge.svg)](https://codecov.io/gh/blacktaxi/oops) [![LuaRocks](https://img.shields.io/luarocks/v/blacktaxi/oops.svg)](https://luarocks.org/modules/blacktaxi/oops) [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 
 ```lua
 local class = require 'oops'

@@ -34,5 +34,14 @@ jobs:
       - name: Build, test, and check coverage
         run: make build-test
 
+      - name: Upload coverage to Codecov
+        if: matrix.lua == '5.4'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./luacov.report.out
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
       - name: Run examples
         run: make check-examples
