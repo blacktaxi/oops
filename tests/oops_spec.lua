@@ -32,6 +32,21 @@ describe('base class functionality', function()
     assert.is_equal(C2, o.__class)
   end)
 
+  it('module callable shortcut creates named class', function()
+    local oops = require('oops')
+    local C = oops('ShortcutClass') {}
+    assert.is_true(class.isclass(C))
+    assert.is_equal('ShortcutClass', C.__name)
+  end)
+
+  it('module callable shortcut creates class with parent', function()
+    local oops = require('oops')
+    local Parent = class {}
+    local Child = oops(Parent) {}
+    assert.is_true(class.isclass(Child))
+    assert.is_equal(Parent, Child.__parent)
+  end)
+
   it('anonymous class can have a parent', function()
     local C1 = class {}
     local C2 = class(nil, C1) {}
@@ -193,6 +208,25 @@ describe('inheritance and dispatch', function()
       local x = 5
       local _ = class(x) {}
     end)
+  end)
+
+  it('passing too many arguments to class should yield an error', function()
+    assert.error(function()
+      local _ = class('Name', nil, {})
+    end)
+  end)
+
+  it('passing invalid first argument type should yield an error', function()
+    assert.error(function()
+      local _ = class(42)
+    end)
+  end)
+
+  it('class with explicit nil name creates anonymous class', function()
+    local C = class(nil) {}
+    assert.is_true(class.isclass(C))
+    -- name should be the default tostring representation, not 'nil'
+    assert.is_not_equal('nil', C.__name)
   end)
 
   it('methods should be inherited', function()
