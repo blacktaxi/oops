@@ -31,13 +31,7 @@ jobs:
       - name: Lint
         run: make lint
 
-      - name: Run tests with coverage
-        run: make test
-
-      - name: Check coverage threshold
-        run: make check-coverage
-
-      - name: Run tests (build-test)
+      - name: Build, test, and check coverage
         run: make build-test
 
       - name: Run examples
