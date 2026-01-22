@@ -15,7 +15,6 @@ dependencies = {
   "busted >= 2.0.0",
   "luacheck",
   "luacov",
-  "luacov-cobertura",
   "mobdebug",
   "moses == 1.6.1-1"
 }

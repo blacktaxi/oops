@@ -24,7 +24,6 @@ check-coverage:
 		exit 1; \
 	fi
 	@luacov > /dev/null
-	@luacov-cobertura -o cobertura.xml
 	@lua scripts/check_coverage.lua $(COVERAGE_THRESHOLD)
 
 .PHONY: build-test
@@ -35,7 +34,6 @@ build-test:
 	busted --coverage $(TESTS)
 	@echo "📊 Checking coverage threshold..."
 	@luacov > /dev/null
-	@luacov-cobertura -o cobertura.xml
 	@lua scripts/check_coverage.lua $(COVERAGE_THRESHOLD)
 
 .PHONY: check-examples
@@ -76,4 +74,4 @@ publish: lint test check-examples build-test
 clean:
 	@echo "🧹 Cleaning up..."
 	find . -name "*.luac" -delete
-	rm -f luacov.*.out cobertura.xml
+	rm -f luacov.*.out
