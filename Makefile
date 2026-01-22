@@ -1,9 +1,10 @@
 ROCKSPEC := $(shell ls *.rockspec | head -n 1)
 SRC := src
 TESTS := tests
+COVERAGE_THRESHOLD := 100
 
 .PHONY: all
-all: lint test check-examples
+all: lint test check-coverage check-examples
 
 .PHONY: deps
 deps:
@@ -12,8 +13,18 @@ deps:
 
 .PHONY: test
 test:
-	@echo "🔍 Running tests..."
-	@LUA_PATH="./src/?.lua;;" busted $(TESTS)
+	@echo "🔍 Running tests with coverage..."
+	@LUA_PATH="./src/?.lua;;" busted --coverage $(TESTS)
+
+.PHONY: check-coverage
+check-coverage:
+	@echo "📊 Checking coverage threshold..."
+	@if [ ! -f luacov.stats.out ]; then \
+		echo "❌ No coverage data found. Run 'make test' first."; \
+		exit 1; \
+	fi
+	@luacov > /dev/null
+	@lua scripts/check_coverage.lua $(COVERAGE_THRESHOLD)
 
 .PHONY: build-test
 build-test:
@@ -60,3 +71,4 @@ publish: lint test check-examples build-test
 clean:
 	@echo "🧹 Cleaning up..."
 	find . -name "*.luac" -delete
+	rm -f luacov.*.out
