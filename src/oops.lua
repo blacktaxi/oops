@@ -223,7 +223,7 @@ local class = function(...)
     elseif type(a) == 'table' then
       -- class { ... }
       return new_class_internal(nil, nil, a)
-    elseif type(a) == 'string' or type(a) == nil then
+    elseif type(a) == 'string' or a == nil then
       -- class("Name") { ... }
       -- class(nil) { ... }
       return function(classdef)
@@ -231,7 +231,7 @@ local class = function(...)
       end
     else
       -- invalid arg
-      error('Invalid argument type. Expected class name or classdef, got: ' .. a)
+      error('Invalid argument type. Expected class name or classdef, got: ' .. tostring(a))
     end
   elseif arg_count == 2 then
     -- class("Name", Parent) { ... }
