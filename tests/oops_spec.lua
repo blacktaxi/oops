@@ -5,11 +5,28 @@ local _ = require('moses')
 local is_luajit = (jit ~= nil)
 
 describe('base class functionality', function()
+  it('empty anonymous class can be created', function()
+    local C = class()
+    local o = C()
+    assert.is_true(class.isclass(C))
+    assert.is_true(class.isobject(o))
+    assert.is_equal(C, o.__class)
+  end)
+
   it('anonymous class can be created', function()
     local C = class {}
     local o = C()
     assert.is_true(class.isclass(C))
     assert.is_true(class.isobject(o))
+    assert.is_equal(C, o.__class)
+  end)
+
+  it('empty named class can be created', function()
+    local C = class('Name')()
+    local o = C()
+    assert.is_true(class.isclass(C))
+    assert.is_true(class.isobject(o))
+    assert.is_equal('Name', C.__name)
     assert.is_equal(C, o.__class)
   end)
 

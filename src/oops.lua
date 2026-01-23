@@ -88,18 +88,27 @@ local known_metamethods = {
 ---@private
 ---@param name? string # Optional class name.
 ---@param parentclass? OopsClass # Optional parent class.
----@param classdef? table # Class definition table.
+---@param ... table # One or more class definition tables to merge.
 ---@return OopsClass
-local new_class_internal = function(name, parentclass, classdef)
+local new_class_internal = function(name, parentclass, ...)
   -- typecheck arguments
   assert(
     (type(name) == 'nil' or type(name) == 'string')
-      and (type(parentclass) == 'nil' or isclass(parentclass))
-      and (type(classdef) == 'nil' or type(classdef) == 'table'),
+      and (type(parentclass) == 'nil' or isclass(parentclass)),
     'Invalid arguments'
   )
 
-  classdef = classdef or {}
+  -- Merge all class definition tables (left-to-right, later overrides earlier)
+  local classdef = {}
+  for i = 1, select('#', ...) do
+    local t = select(i, ...)
+    if type(t) ~= 'table' then
+      error('Expected table for class definition, got ' .. type(t))
+    end
+    for k, v in pairs(t) do
+      classdef[k] = v
+    end
+  end
 
   -- extract and remove __class from classdef
   local class_fields = classdef.__class or {}
@@ -197,6 +206,7 @@ end
 -- Usage patterns:
 -- ```lua
 -- -- Basic class definition:
+-- local C = class()  -- empty class
 -- local C = class { __init = function(self) ... end }
 -- local Named = class("Named") { ... }
 -- local Sub = class(BaseClass) { ... }
@@ -210,38 +220,31 @@ end
 -- local Boss = class("Boss", BaseClass)(Mixin1, Mixin2, { ... })
 -- ```
 --
----@overload fun(def: table): OopsClass
----@overload fun(name: string): fun(def: table): OopsClass
----@overload fun(parent: OopsClass): fun(def: table): OopsClass
----@overload fun(name: string, parent: OopsClass): fun(def: table): OopsClass
 ---@overload fun(...: table): OopsClass
+---@overload fun(name: string): fun(...: table): OopsClass
+---@overload fun(parent: OopsClass): fun(...: table): OopsClass
+---@overload fun(name: string, parent: OopsClass): fun(...: table): OopsClass
 local class = function(...)
   local arg_count = select('#', ...)
-
-  if arg_count == 0 then
-    error('Expected at least 1 argument')
-  end
 
   if arg_count == 1 then
     -- class(ParentClass) { ... }
     -- class("Name") { ... }
-    -- class(nil) { ... }
     -- class { ... }
     local a = ...
 
     if isclass(a) then
       -- class(ParentClass) { ... }
-      return function(classdef)
-        return new_class_internal(nil, a, classdef)
+      return function(...)
+        return new_class_internal(nil, a, ...)
       end
     elseif type(a) == 'table' then
       -- class { ... }
       return new_class_internal(nil, nil, a)
-    elseif type(a) == 'string' or type(a) == nil then
+    elseif type(a) == 'string' then
       -- class("Name") { ... }
-      -- class(nil) { ... }
-      return function(classdef)
-        return new_class_internal(a, nil, classdef)
+      return function(...)
+        return new_class_internal(a, nil, ...)
       end
     else
       -- invalid arg
@@ -254,30 +257,18 @@ local class = function(...)
     -- vs the new multi-table merge pattern
     if (type(a) == 'string' or a == nil) and (isclass(b) or b == nil) then
       -- class("Name", Parent) { ... } - curried pattern
-      return function(classdef)
-        return new_class_internal(a, b, classdef)
+      return function(...)
+        return new_class_internal(a, b, ...)
       end
     end
 
     -- Otherwise, fall through to multi-table merge
   end
 
-  -- Multi-table merge mode (arg_count >= 2)
-  -- All arguments must be tables - no name/parent parsing
+  -- Multi-table merge mode (arg_count == 0 or >= 2)
+  -- All arguments must be tables
   -- Use curried form class(Parent)(Mixin1, {def}) for inheritance + mixins
-  local merged = {}
-  for i = 1, arg_count do
-    local t = select(i, ...)
-    if type(t) ~= 'table' then
-      error('Expected table at argument ' .. i .. ', got ' .. type(t))
-    end
-    -- Merge this table into the result (later tables override earlier ones)
-    for k, v in pairs(t) do
-      merged[k] = v
-    end
-  end
-
-  return new_class_internal(nil, nil, merged)
+  return new_class_internal(nil, nil, ...)
 end
 
 ---@type OopsModule
