@@ -1021,7 +1021,7 @@ describe('multi-table merge (mixin-style composition)', function()
     assert.is_equal(C():value(), 'second')
   end)
 
-  it('supports inheritance with mixins', function()
+  it('supports inheritance with mixins (curried form)', function()
     local Base = class {
       base_method = function()
         return 'base'
@@ -1034,7 +1034,7 @@ describe('multi-table merge (mixin-style composition)', function()
       end,
     }
 
-    local Child = class(Base, mixin, {
+    local Child = class(Base)(mixin, {
       child_method = function()
         return 'child'
       end,
@@ -1046,26 +1046,26 @@ describe('multi-table merge (mixin-style composition)', function()
     assert.is_equal(o:child_method(), 'child')
   end)
 
-  it('supports named classes with mixins', function()
+  it('supports named classes with mixins (curried form)', function()
     local mixin = {
       greet = function()
         return 'hello'
       end,
     }
 
-    local C = class('MyClass', mixin, {})
+    local C = class('MyClass')(mixin, {})
     assert.is_equal(C.__name, 'MyClass')
     assert.is_equal(C():greet(), 'hello')
   end)
 
-  it('supports named classes with parent and mixins', function()
+  it('supports named classes with parent and mixins (curried form)', function()
     local Base = class { x = 1 }
 
     local mixin = {
       y = 2,
     }
 
-    local C = class('Derived', Base, mixin, {
+    local C = class('Derived', Base)(mixin, {
       z = 3,
     })
 
@@ -1206,7 +1206,7 @@ describe('multi-table merge (mixin-style composition)', function()
     assert.is_equal(e.timer, 4)
   end)
 
-  it('works with inherited parent __super access', function()
+  it('works with inherited parent __super access (curried form)', function()
     local Base = class {
       __init = function(self)
         self.base_initialized = true
@@ -1219,7 +1219,7 @@ describe('multi-table merge (mixin-style composition)', function()
       end,
     }
 
-    local Derived = class(Base, mixin, {
+    local Derived = class(Base)(mixin, {
       __init = function(self)
         self.__super:__init()
         self.derived_initialized = true

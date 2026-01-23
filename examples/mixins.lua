@@ -126,8 +126,8 @@ print('Bullet position: (' .. bullet.x .. ', ' .. bullet.y .. ')')
 bullet:update(0.5)
 print('After 0.5s: (' .. string.format('%.1f', bullet.x) .. ', ' .. string.format('%.1f', bullet.y) .. ')')
 
--- Example 3: Inheritance + Mixins
-print('\nExample 3: Using inheritance with mixins')
+-- Example 3: Inheritance + Mixins (curried form)
+print('\nExample 3: Using inheritance with mixins (curried form)')
 print('---')
 
 local Entity = class {
@@ -142,7 +142,8 @@ local Entity = class {
 }
 
 -- Enemy inherits from Entity and mixes in physics
-local Enemy = class(Entity, PhysicsBody, {
+-- Note: use curried form class(Parent)(Mixin, {def})
+local Enemy = class(Entity)(PhysicsBody, {
   __init = function(self, name, x, y)
     self.__super:__init(name)
     self.x, self.y = x, y
@@ -160,11 +161,11 @@ enemy:apply_force(5, 0)
 enemy:update_physics(1)
 print('After movement:', enemy:info())
 
--- Example 4: Named class with mixins
-print('\nExample 4: Named class with multiple mixins')
+-- Example 4: Named class with mixins (curried form)
+print('\nExample 4: Named class with multiple mixins (curried form)')
 print('---')
 
-local PowerUp = class('PowerUp', Timed, PhysicsBody, {
+local PowerUp = class('PowerUp')(Timed, PhysicsBody, {
   __init = function(self, x, y, power)
     self.x, self.y = x, y
     self.vx, self.vy = 0, 0
@@ -219,7 +220,10 @@ print('With custom override: ' .. ClassCustom():greet())
 print('\n=== Summary ===')
 print('Multi-table merge allows mixin-style composition:')
 print('- Define reusable behaviors as plain tables')
-print('- Compose classes from multiple mixins')
-print('- Works with inheritance, naming, and all existing features')
+print('- Compose classes from multiple mixins: class(Mixin1, Mixin2, {def})')
+print('- Use curried form for inheritance + mixins:')
+print('  - class(Parent)(Mixin1, {def})')
+print('  - class("Name")(Mixin1, {def})')
+print('  - class("Name", Parent)(Mixin1, {def})')
 print('- Later tables override earlier ones on name collision')
 print('- Zero runtime overhead - merging happens at class definition time')

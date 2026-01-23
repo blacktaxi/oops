@@ -161,13 +161,13 @@ local Player = class(Timed, PhysicsBody, {
   end
 })
 
--- Works with inheritance too
-local Enemy = class(Entity, Timed, PhysicsBody, {
+-- Combine inheritance with mixins using curried form
+local Enemy = class(Entity)(Timed, PhysicsBody, {
   -- Enemy inherits from Entity and mixes in timer and physics behaviors
 })
 
--- And with named classes
-local Boss = class("Boss", Enemy, SpecialPowers, {
+-- Works with named classes too
+local Boss = class("Boss", Enemy)(SpecialPowers, {
   -- Named class with parent and mixins
 })
 ```

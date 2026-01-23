@@ -196,14 +196,18 @@ end
 --
 -- Usage patterns:
 -- ```lua
+-- -- Basic class definition:
 -- local C = class { __init = function(self) ... end }
 -- local Named = class("Named") { ... }
 -- local Sub = class(BaseClass) { ... }
 -- local Derived = class("Derived", BaseClass) { ... }
+--
 -- -- Multi-table merge (mixin-style composition):
 -- local Player = class(Mixin1, Mixin2, { ... })
--- local Enemy = class(BaseClass, Mixin1, { ... })
--- local Boss = class("Boss", BaseClass, Mixin1, { ... })
+--
+-- -- Combining parent/name with mixins (curried form):
+-- local Enemy = class(BaseClass)(Mixin1, Mixin2, { ... })
+-- local Boss = class("Boss", BaseClass)(Mixin1, Mixin2, { ... })
 -- ```
 --
 ---@overload fun(def: table): OopsClass
@@ -259,32 +263,10 @@ local class = function(...)
   end
 
   -- Multi-table merge mode (arg_count >= 2)
-  -- Parse optional name and/or parent from the beginning
-  local name, parent, start_idx = nil, nil, 1
-  local first, second = select(1, ...), select(2, ...)
-
-  if type(first) == 'string' then
-    name = first
-    start_idx = 2
-
-    -- Check if second arg is parent class
-    if arg_count >= 2 and isclass(second) then
-      parent = second
-      start_idx = 3
-    end
-  elseif isclass(first) then
-    parent = first
-    start_idx = 2
-  end
-
-  -- Ensure we have at least one table to merge
-  if start_idx > arg_count then
-    error('Expected at least one table definition after name/parent')
-  end
-
-  -- Merge all table arguments from start_idx onwards
+  -- All arguments must be tables - no name/parent parsing
+  -- Use curried form class(Parent)(Mixin1, {def}) for inheritance + mixins
   local merged = {}
-  for i = start_idx, arg_count do
+  for i = 1, arg_count do
     local t = select(i, ...)
     if type(t) ~= 'table' then
       error('Expected table at argument ' .. i .. ', got ' .. type(t))
@@ -295,7 +277,7 @@ local class = function(...)
     end
   end
 
-  return new_class_internal(name, parent, merged)
+  return new_class_internal(nil, nil, merged)
 end
 
 ---@type OopsModule
