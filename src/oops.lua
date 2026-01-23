@@ -99,20 +99,30 @@ local new_class_internal = function(name, parentclass, ...)
   )
 
   -- Merge all class definition tables (left-to-right, later overrides earlier)
+  -- Special handling for __class tables: they need to be merged too
   local classdef = {}
+  local class_fields = {}
+
   for i = 1, select('#', ...) do
     local t = select(i, ...)
     if type(t) ~= 'table' then
       error('Expected table for class definition, got ' .. type(t))
     end
+
+    -- Merge regular fields
     for k, v in pairs(t) do
-      classdef[k] = v
+      if k == '__class' then
+        -- Merge __class tables separately
+        if type(v) == 'table' then
+          for cf_key, cf_val in pairs(v) do
+            class_fields[cf_key] = cf_val
+          end
+        end
+      else
+        classdef[k] = v
+      end
     end
   end
-
-  -- extract and remove __class from classdef
-  local class_fields = classdef.__class or {}
-  classdef.__class = nil
 
   local class = {
     __parent = parentclass,
