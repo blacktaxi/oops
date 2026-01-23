@@ -200,14 +200,24 @@ end
 -- local Named = class("Named") { ... }
 -- local Sub = class(BaseClass) { ... }
 -- local Derived = class("Derived", BaseClass) { ... }
+-- -- Multi-table merge (mixin-style composition):
+-- local Player = class(Mixin1, Mixin2, { ... })
+-- local Enemy = class(BaseClass, Mixin1, { ... })
+-- local Boss = class("Boss", BaseClass, Mixin1, { ... })
 -- ```
 --
 ---@overload fun(def: table): OopsClass
 ---@overload fun(name: string): fun(def: table): OopsClass
 ---@overload fun(parent: OopsClass): fun(def: table): OopsClass
 ---@overload fun(name: string, parent: OopsClass): fun(def: table): OopsClass
+---@overload fun(...: table): OopsClass
 local class = function(...)
   local arg_count = select('#', ...)
+
+  if arg_count == 0 then
+    error('Expected at least 1 argument')
+  end
+
   if arg_count == 1 then
     -- class(ParentClass) { ... }
     -- class("Name") { ... }
@@ -231,20 +241,61 @@ local class = function(...)
       end
     else
       -- invalid arg
-      error('Invalid argument type. Expected class name or classdef, got: ' .. a)
+      error('Invalid argument type. Expected class name or classdef, got: ' .. type(a))
     end
   elseif arg_count == 2 then
-    -- class("Name", Parent) { ... }
-    -- class("Name", nil) { ... }
-    -- class(nil, Parent) { ... }
-    -- class(nil, nil) { ... }
-    local name, parent = ...
-    return function(classdef)
-      return new_class_internal(name, parent, classdef)
+    local a, b = ...
+
+    -- Check if this is the curried pattern: class("Name", Parent) { ... }
+    -- vs the new multi-table merge pattern
+    if (type(a) == 'string' or a == nil) and (isclass(b) or b == nil) then
+      -- class("Name", Parent) { ... } - curried pattern
+      return function(classdef)
+        return new_class_internal(a, b, classdef)
+      end
     end
-  else
-    error('Expected 1 or 2 arguments, got ' .. arg_count)
+
+    -- Otherwise, fall through to multi-table merge
   end
+
+  -- Multi-table merge mode (arg_count >= 2)
+  -- Parse optional name and/or parent from the beginning
+  local name, parent, start_idx = nil, nil, 1
+  local first, second = select(1, ...), select(2, ...)
+
+  if type(first) == 'string' then
+    name = first
+    start_idx = 2
+
+    -- Check if second arg is parent class
+    if arg_count >= 2 and isclass(second) then
+      parent = second
+      start_idx = 3
+    end
+  elseif isclass(first) then
+    parent = first
+    start_idx = 2
+  end
+
+  -- Ensure we have at least one table to merge
+  if start_idx > arg_count then
+    error('Expected at least one table definition after name/parent')
+  end
+
+  -- Merge all table arguments from start_idx onwards
+  local merged = {}
+  for i = start_idx, arg_count do
+    local t = select(i, ...)
+    if type(t) ~= 'table' then
+      error('Expected table at argument ' .. i .. ', got ' .. type(t))
+    end
+    -- Merge this table into the result (later tables override earlier ones)
+    for k, v in pairs(t) do
+      merged[k] = v
+    end
+  end
+
+  return new_class_internal(name, parent, merged)
 end
 
 ---@type OopsModule

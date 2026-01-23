@@ -977,3 +977,258 @@ describe('metamethods', function()
     assert.is_equal(F()(), 'A')
   end)
 end)
+
+describe('multi-table merge (mixin-style composition)', function()
+  it('merges two tables into a class', function()
+    local mixin1 = {
+      foo = function(self)
+        return 'foo'
+      end,
+    }
+
+    local mixin2 = {
+      bar = function(self)
+        return 'bar'
+      end,
+    }
+
+    local C = class(mixin1, mixin2, {
+      __init = function(self)
+        self.x = 1
+      end,
+    })
+
+    local o = C()
+    assert.is_equal(o:foo(), 'foo')
+    assert.is_equal(o:bar(), 'bar')
+    assert.is_equal(o.x, 1)
+  end)
+
+  it('later tables override earlier tables on name collision', function()
+    local mixin1 = {
+      value = function()
+        return 'first'
+      end,
+    }
+
+    local mixin2 = {
+      value = function()
+        return 'second'
+      end,
+    }
+
+    local C = class(mixin1, mixin2, {})
+    assert.is_equal(C():value(), 'second')
+  end)
+
+  it('supports inheritance with mixins', function()
+    local Base = class {
+      base_method = function()
+        return 'base'
+      end,
+    }
+
+    local mixin = {
+      mixin_method = function()
+        return 'mixin'
+      end,
+    }
+
+    local Child = class(Base, mixin, {
+      child_method = function()
+        return 'child'
+      end,
+    })
+
+    local o = Child()
+    assert.is_equal(o:base_method(), 'base')
+    assert.is_equal(o:mixin_method(), 'mixin')
+    assert.is_equal(o:child_method(), 'child')
+  end)
+
+  it('supports named classes with mixins', function()
+    local mixin = {
+      greet = function()
+        return 'hello'
+      end,
+    }
+
+    local C = class('MyClass', mixin, {})
+    assert.is_equal(C.__name, 'MyClass')
+    assert.is_equal(C():greet(), 'hello')
+  end)
+
+  it('supports named classes with parent and mixins', function()
+    local Base = class { x = 1 }
+
+    local mixin = {
+      y = 2,
+    }
+
+    local C = class('Derived', Base, mixin, {
+      z = 3,
+    })
+
+    local o = C()
+    assert.is_equal(C.__name, 'Derived')
+    assert.is_equal(o.x, 1)
+    assert.is_equal(o.y, 2)
+    assert.is_equal(o.z, 3)
+  end)
+
+  it('merges __class tables from mixins', function()
+    local mixin1 = {
+      __class = {
+        static1 = function()
+          return 'static1'
+        end,
+      },
+    }
+
+    local mixin2 = {
+      __class = {
+        static2 = function()
+          return 'static2'
+        end,
+      },
+    }
+
+    local C = class(mixin1, mixin2, {})
+
+    assert.is_equal(C:static1(), 'static1')
+    assert.is_equal(C:static2(), 'static2')
+  end)
+
+  it('later __class tables override earlier ones', function()
+    local mixin1 = {
+      __class = {
+        value = 'first',
+      },
+    }
+
+    local mixin2 = {
+      __class = {
+        value = 'second',
+      },
+    }
+
+    local C = class(mixin1, mixin2, {})
+    assert.is_equal(C.value, 'second')
+  end)
+
+  it('allows __init from last table to be used', function()
+    local mixin = {
+      __init = function(self)
+        self.from_mixin = true
+      end,
+    }
+
+    local C = class(mixin, {
+      __init = function(self)
+        self.from_class = true
+      end,
+    })
+
+    local o = C()
+    assert.is_nil(o.from_mixin)
+    assert.is_true(o.from_class)
+  end)
+
+  it('merges instance fields correctly', function()
+    local mixin1 = { a = 1, b = 2 }
+    local mixin2 = { c = 3, d = 4 }
+
+    local C = class(mixin1, mixin2, { e = 5 })
+
+    local o = C()
+    assert.is_equal(o.a, 1)
+    assert.is_equal(o.b, 2)
+    assert.is_equal(o.c, 3)
+    assert.is_equal(o.d, 4)
+    assert.is_equal(o.e, 5)
+  end)
+
+  it('handles metamethods in mixins', function()
+    local addable = {
+      __add = function(a, b)
+        return a.__class(a.value + b.value)
+      end,
+    }
+
+    local C = class(addable, {
+      __init = function(self, value)
+        self.value = value
+      end,
+    })
+
+    local result = C(10) + C(20)
+    assert.is_equal(result.value, 30)
+  end)
+
+  it('errors when non-table is passed in multi-table mode', function()
+    assert.has_error(function()
+      local _ = class({ x = 1 }, 'not a table', { y = 2 })
+    end)
+  end)
+
+  it('supports multiple mixins for composition patterns', function()
+    local Timed = {
+      add_timer = function(self, duration)
+        self.timer = duration
+      end,
+      update_timer = function(self, dt)
+        if self.timer then
+          self.timer = self.timer - dt
+        end
+      end,
+    }
+
+    local Positioned = {
+      set_position = function(self, x, y)
+        self.x, self.y = x, y
+      end,
+    }
+
+    local Entity = class(Timed, Positioned, {
+      __init = function(self)
+        self.x, self.y = 0, 0
+        self.timer = nil
+      end,
+    })
+
+    local e = Entity()
+    e:set_position(10, 20)
+    e:add_timer(5)
+    e:update_timer(1)
+
+    assert.is_equal(e.x, 10)
+    assert.is_equal(e.y, 20)
+    assert.is_equal(e.timer, 4)
+  end)
+
+  it('works with inherited parent __super access', function()
+    local Base = class {
+      __init = function(self)
+        self.base_initialized = true
+      end,
+    }
+
+    local mixin = {
+      mixin_method = function()
+        return 'from_mixin'
+      end,
+    }
+
+    local Derived = class(Base, mixin, {
+      __init = function(self)
+        self.__super:__init()
+        self.derived_initialized = true
+      end,
+    })
+
+    local o = Derived()
+    assert.is_true(o.base_initialized)
+    assert.is_true(o.derived_initialized)
+    assert.is_equal(o:mixin_method(), 'from_mixin')
+  end)
+end)

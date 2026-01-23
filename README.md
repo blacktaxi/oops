@@ -30,6 +30,7 @@ Oops is a lightweight, expressive, [class-based](http://en.wikipedia.org/wiki/Cl
 - Classes as expressions (classes can be anonymous, and defined and used on the spot).
 - Controlled visibility scope: classes don't have to be global.
 - Concise syntax: `local Class = class { hello = function (self) print('world!') end }`.
+- Mixin-style composition via multi-table merge (spread-like syntax for behavior composition)
 - Class fields and methods (a-la Python)
 - Full metamethod support with inheritance (operator overloading)
 - Minimal runtime overhead
@@ -110,6 +111,65 @@ Sub:increment()
 
 print("Counter value:", Counter.value)  --> 2
 print("Sub value:", Sub.value)          --> 1
+```
+
+Mixin-style composition with multi-table merge:
+
+```lua
+local class = require("oops")
+
+-- Define reusable behaviors as plain tables
+local Timed = {
+  add_timer = function(self, duration, callback)
+    table.insert(self.timers, {time = duration, callback = callback})
+  end,
+
+  update_timers = function(self, dt)
+    for i = #self.timers, 1, -1 do
+      local t = self.timers[i]
+      t.time = t.time - dt
+      if t.time <= 0 then
+        t.callback()
+        table.remove(self.timers, i)
+      end
+    end
+  end
+}
+
+local PhysicsBody = {
+  apply_force = function(self, fx, fy)
+    self.vx, self.vy = self.vx + fx, self.vy + fy
+  end,
+
+  update_physics = function(self, dt)
+    self.x, self.y = self.x + self.vx * dt, self.y + self.vy * dt
+  end
+}
+
+-- Compose multiple behaviors into a single class
+-- Tables are merged left-to-right (later tables override earlier ones)
+local Player = class(Timed, PhysicsBody, {
+  __init = function(self, x, y)
+    self.x, self.y = x, y
+    self.vx, self.vy = 0, 0
+    self.timers = {}
+  end,
+
+  update = function(self, dt)
+    self:update_timers(dt)
+    self:update_physics(dt)
+  end
+})
+
+-- Works with inheritance too
+local Enemy = class(Entity, Timed, PhysicsBody, {
+  -- Enemy inherits from Entity and mixes in timer and physics behaviors
+})
+
+-- And with named classes
+local Boss = class("Boss", Enemy, SpecialPowers, {
+  -- Named class with parent and mixins
+})
 ```
 
 Metamethod support:
