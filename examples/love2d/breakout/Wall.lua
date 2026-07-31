@@ -22,7 +22,6 @@ local Wall = class('Wall', PhysicsObject) {
   __class = {
     createBounds = function(cls, world, screenW, screenH)
       local thickness = 30
-      print(cls)
       return {
         cls(world, screenW / 2, -thickness / 2, screenW, thickness), -- top
         cls(world, -thickness / 2, screenH / 2, thickness, screenH), -- left

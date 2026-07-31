@@ -1,4 +1,6 @@
-package.path = 'src/?.lua;' .. package.path
+-- LÖVE's package.path loader resolves against the process working directory, so
+-- cover both ways of launching: from the repo root and from this game directory.
+package.path = 'src/?.lua;../../../src/?.lua;' .. package.path
 
 local class = require('oops')
 

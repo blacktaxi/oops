@@ -1,6 +1,7 @@
 ROCKSPEC := $(shell ls *.rockspec | head -n 1)
 SRC := src
 TESTS := tests
+LOVE_EXAMPLES := examples/love2d
 COVERAGE_THRESHOLD := 100
 
 .PHONY: all
@@ -37,7 +38,7 @@ build-test:
 	@lua scripts/check_coverage.lua $(COVERAGE_THRESHOLD)
 
 .PHONY: check-examples
-check-examples:
+check-examples: check-love-examples
 	@echo "📦 Running example scripts..."
 	@set -e; \
 	for file in examples/*.lua; do \
@@ -45,6 +46,18 @@ check-examples:
 	  LUA_PATH="./src/?.lua;;" lua $$file > /dev/null; \
 	done
 	@echo "✅ All examples ran successfully."
+
+# The LÖVE examples need a graphical runtime and a window, so they cannot be
+# executed here. Syntax-check them instead, so they at least don't silently rot.
+.PHONY: check-love-examples
+check-love-examples:
+	@echo "🎮 Syntax-checking LÖVE examples..."
+	@set -e; \
+	for file in $$(find $(LOVE_EXAMPLES) -name '*.lua'); do \
+	  echo "▶️  Checking $$file..."; \
+	  luac -p $$file; \
+	done
+	@echo "✅ All LÖVE examples are syntactically valid."
 
 .PHONY: format
 format:

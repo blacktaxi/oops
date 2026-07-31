@@ -143,7 +143,7 @@ print(c)        --> (4, 6)
 print(a == b)   --> false
 ```
 
-For more examples see [`examples/](./examples).
+For more examples see [`examples/`](./examples).
 
 ## Development
 
