@@ -19,6 +19,10 @@ local Ball = class('Ball', PhysicsObject) {
     self.shape = love.physics.newCircleShape(12)
     self.fixture = love.physics.newFixture(self.body, self.shape, 1)
     self.fixture:setRestitution(1)
+    -- Pairs with the paddle's 0.5 for a mixed friction of exactly 0.5. Walls and
+    -- bricks stay at 0, so sqrt(a*b) keeps them frictionless: spin is only ever
+    -- exchanged with the paddle.
+    self.fixture:setFriction(0.5)
     self.fixture:setUserData(self)
 
     self.body:setBullet(true) -- prevent tunneling
@@ -27,27 +31,66 @@ local Ball = class('Ball', PhysicsObject) {
 
     -- Speed floor for when gravity alone doesn't demand more, and a ceiling so
     -- that a hard paddle swat can't run away with it.
-    self.speed = 700
-    self.maxSpeed = 1200
-    self.headroom = 1.08 -- arrive at the top with a little speed still in hand
+    self.speed = 450
+    self.maxSpeed = 1150
+    -- How fast the ball should still be at the top of the field. Gravity makes it
+    -- slowest exactly where the bricks are, so this, not the launch speed, is what
+    -- governs the pace of the part of the game you actually watch.
+    self.apexSpeed = 480
+    self.headroom = 1.05 -- margin on top of merely clearing the climb
     self.maxLaunchAngle = math.rad(45) -- widest launch that still reaches a brick
-    -- How much of the paddle's motion the ball leaves with. Tuned so a full-speed
-    -- sweep lands right on maxLaunchAngle: any higher and the top of the input
-    -- range would clamp to the same shot, wasting it.
-    self.carry = 0.5
 
     -- The ball must always be able to climb back to the ceiling, so that height
     -- is what the energy calculations below are measured against.
     self.apexY = self.shape:getRadius()
   end,
 
-  -- Speed needed here to just coast up to apexY, straight out of 1/2 v^2 = g*h.
-  -- Derived from the world's own gravity, so retuning gravity retunes this too.
-  climbSpeed = function(self)
+  -- The speed^2 that climbing to apexY costs, straight out of 1/2 v^2 = g*h.
+  -- Read from the world's own gravity, so retuning gravity retunes this too.
+  climbCost = function(self)
     local _, gravity = self.body:getWorld():getGravity()
-    local climb = math.max(0, self.body:getY() - self.apexY)
 
-    return math.max(self.speed, math.sqrt(2 * gravity * climb) * self.headroom)
+    return 2 * gravity * math.max(0, self.body:getY() - self.apexY)
+  end,
+
+  -- Upward speed needed to just barely clear that climb.
+  climbSpeed = function(self)
+    return math.sqrt(self:climbCost()) * self.headroom
+  end,
+
+  -- Total speed needed along (dx, dy), against two separate requirements.
+  speedFor = function(self, dx, dy)
+    local cost = self:climbCost()
+
+    -- Pace. Gravity bills the ball for height and nothing else, so at the top it
+    -- still has sqrt(s^2 - 2gh) whatever its heading -- making this term entirely
+    -- direction-free. Without it the ball merely arrives at the brick field,
+    -- crawling, which is the one place it wants to be lively.
+    local needed = math.sqrt(self.apexSpeed * self.apexSpeed + cost)
+
+    -- Reach. Only the upward share of the heading buys height, so a shallow shot
+    -- needs proportionally more speed to make the same climb. This is the term
+    -- that matters once lean and friction start angling the returns over.
+    local len = math.sqrt(dx * dx + dy * dy)
+    local upward = len > 0 and -dy / len or 1
+
+    if upward > 0 then
+      needed = math.max(needed, math.sqrt(cost) * self.headroom / upward)
+    end
+
+    return clamp(needed, self.speed, self.maxSpeed)
+  end,
+
+  -- How much of the paddle's motion the ball leaves with, solved so that a
+  -- full-speed sweep lands exactly on maxLaunchAngle. Deriving it beats picking a
+  -- constant: it depends on the paddle's top speed, its lean and the ball's own
+  -- speed, so any of those three moving used to silently push the top of the
+  -- sweep range past the cone, where it clamped and went dead.
+  carryFactor = function(self, base)
+    local paddle = self.objects.paddle
+    local widest = math.cos(paddle.maxLean) * math.tan(self.maxLaunchAngle)
+
+    return math.max(0, base * (widest - math.sin(paddle.maxLean)) / paddle.speed)
   end,
 
   launch = function(self)
@@ -57,7 +100,10 @@ local Ball = class('Ball', PhysicsObject) {
       -- Fire along the paddle's face, so leaning aims the shot...
       local paddle = self.objects.paddle
       local nx, ny = paddle:surfaceNormal()
-      local speed = self:climbSpeed()
+      -- Only used to mix the normal against the carried velocity in sensible
+      -- proportion; the shot's actual speed comes from the direction that falls
+      -- out of it, below.
+      local base = self:climbSpeed()
 
       -- ...plus the paddle's own sideways motion, since the ball is riding it
       -- and leaves carrying it. Velocity leads where lean lags: lean is a spring
@@ -66,8 +112,8 @@ local Ball = class('Ball', PhysicsObject) {
       -- therefore steers the shot immediately, rather than only after a sustained
       -- run-up long enough for the lean to catch up.
       local pvx = paddle.body:getLinearVelocity()
-      local dx = nx * speed + pvx * self.carry
-      local dy = ny * speed
+      local dx = nx * base + pvx * self:carryFactor(base)
+      local dy = ny * base
 
       -- Jitter only keeps a flat, stationary paddle from firing perfectly
       -- vertically, which would bounce straight back down forever.
@@ -82,8 +128,9 @@ local Ball = class('Ball', PhysicsObject) {
       local widest = -dy * math.tan(self.maxLaunchAngle)
       dx = clamp(dx, -widest, widest)
 
-      -- Renormalise: the sweep steers the shot, it doesn't add energy to it, so
-      -- the climbSpeed guarantee survives however hard you were moving.
+      -- Sweep steers the shot; the speed is then whatever that heading needs to
+      -- still make the climb, so a flatter launch is a faster one.
+      local speed = self:speedFor(dx, dy)
       local len = math.sqrt(dx * dx + dy * dy)
 
       self.body:setLinearVelocity(dx / len * speed, dy / len * speed)
@@ -102,6 +149,10 @@ local Ball = class('Ball', PhysicsObject) {
 
       self.body:setPosition(px + nx * gap, py + ny * gap)
       self.body:setLinearVelocity(0, 0)
+      -- Held means fully controlled, spin included. The clearance above means
+      -- nothing is actually touching the ball, so there is no friction to arrest
+      -- the spin it arrived with and it would keep turning on the paddle forever.
+      self.body:setAngularVelocity(0)
       self.returned = false
       return
     end
@@ -120,7 +171,7 @@ local Ball = class('Ball', PhysicsObject) {
   restoreEnergy = function(self)
     local vx, vy = self.body:getLinearVelocity()
     local speed = math.sqrt(vx * vx + vy * vy)
-    local needed = self:climbSpeed()
+    local needed = self:speedFor(vx, vy)
 
     if speed > 0 and speed < needed then
       self.body:setLinearVelocity(vx * needed / speed, vy * needed / speed)
@@ -139,8 +190,19 @@ local Ball = class('Ball', PhysicsObject) {
 
   draw = function(self)
     local x, y = self.body:getPosition()
+    local radius = self.shape:getRadius()
+
     love.graphics.setColor(1, 0.5, 0.5)
-    love.graphics.circle('fill', x, y, self.shape:getRadius())
+    love.graphics.circle('fill', x, y, radius)
+
+    -- Spin carries over between hits and reverses the next one's deflection, so
+    -- it has to be legible. Without a marker the ball's rotation is invisible and
+    -- the english it produces just looks like the ball misbehaving.
+    local angle = self.body:getAngle()
+    love.graphics.setColor(0.5, 0.15, 0.15)
+    love.graphics.setLineWidth(2)
+    love.graphics.line(x, y, x + math.cos(angle) * radius, y + math.sin(angle) * radius)
+    love.graphics.setLineWidth(1)
   end,
 }
 

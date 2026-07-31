@@ -36,9 +36,12 @@ function love.load()
 
   world = love.physics.newWorld(0, 0, true)
   -- Gravity sets the ball's speed floor: it has to leave the paddle fast enough
-  -- to climb back to the ceiling, so heavier gravity forces a faster ball. 800
-  -- demanded ~985 px/s off every return, which is what made the game frantic.
-  world:setGravity(0, 500)
+  -- to climb back to the ceiling, so heavier gravity forces a faster ball. This
+  -- is what spreads the ball's speed between the paddle line and the ceiling.
+  -- Lighter gravity narrows that spread, which is what keeps the ball from
+  -- crawling through the brick field; Ball.apexSpeed sets where the slow end of
+  -- it lands.
+  world:setGravity(0, 250)
 
   -- Load class modules (we’ll define these soon)
   local Paddle = require('Paddle')

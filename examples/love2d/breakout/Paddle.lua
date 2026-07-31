@@ -23,8 +23,12 @@ local Paddle = class('Paddle', PhysicsObject) {
     self.restY = y
 
     -- Travel. Force-driven, so it winds up to speed instead of snapping to it.
-    self.speed = 700 -- top speed, px/s
-    self.thrust = 2800 -- acceleration ceiling, px/s^2
+    -- Top speed has to beat the ball's horizontal component or the paddle simply
+    -- cannot follow a shallow shot: at the widest launch the ball tracks sideways
+    -- at ~830 px/s. Mass is deliberately not involved -- drive() below divides it
+    -- straight back out, so weight changes recoil, never responsiveness.
+    self.speed = 950 -- top speed, px/s
+    self.thrust = 3600 -- acceleration ceiling, px/s^2
     self.grip = 9 -- how hard it chases the target speed
 
     -- Lean. A torque spring: ball impacts land in the same angular state the
@@ -52,7 +56,12 @@ local Paddle = class('Paddle', PhysicsObject) {
     self.body:resetMassData()
 
     self.fixture:setRestitution(1)
-    self.fixture:setFriction(0)
+    -- Friction is what lets a sweeping paddle transfer its sideways motion to the
+    -- ball. With it at 0 the contact could only push along the normal, so a flat
+    -- paddle moving sideways imparted precisely nothing. Box2D mixes friction as
+    -- sqrt(a*b) and the walls and bricks are still 0, so this only ever applies
+    -- to the ball, and only against the paddle.
+    self.fixture:setFriction(0.5)
     -- Share a negative group with the walls so the two never collide: the paddle
     -- is bounded by clampToWindow below, and a leaning corner catching on a wall
     -- would otherwise spin it. The ball's group is 0, so it still hits both.
