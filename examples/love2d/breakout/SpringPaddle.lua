@@ -46,6 +46,12 @@ local SpringPaddle = class('SpringPaddle') {
     end
   end,
 
+  -- Same contract as PhysicsObject:surfaceNormal, so Ball can rest on either paddle.
+  surfaceNormal = function(self)
+    local angle = self.body:getAngle()
+    return math.sin(angle), -math.cos(angle)
+  end,
+
   draw = function(self)
     local x, y = self.body:getPosition()
     local angle = self.body:getAngle()

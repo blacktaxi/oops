@@ -18,6 +18,12 @@ local PhysicsObject = class('PhysicsObject') {
     -- override as needed
   end,
 
+  -- Outward normal of the top face, following the body's rotation.
+  surfaceNormal = function(self)
+    local angle = self.body:getAngle()
+    return math.sin(angle), -math.cos(angle)
+  end,
+
   draw = function(self)
     local x, y = self.body:getPosition()
     local angle = self.body:getAngle()

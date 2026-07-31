@@ -35,7 +35,10 @@ function love.load()
   love.window.setTitle('Breakout with Physics + OOP')
 
   world = love.physics.newWorld(0, 0, true)
-  world:setGravity(0, 800)
+  -- Gravity sets the ball's speed floor: it has to leave the paddle fast enough
+  -- to climb back to the ceiling, so heavier gravity forces a faster ball. 800
+  -- demanded ~985 px/s off every return, which is what made the game frantic.
+  world:setGravity(0, 500)
 
   -- Load class modules (we’ll define these soon)
   local Paddle = require('Paddle')
@@ -46,7 +49,9 @@ function love.load()
 
   -- Create world elements
   -- objects.paddle = SpringPaddle(world, 400, 550, 120, 20)
-  objects.paddle = Paddle(world, 400, 580)
+  -- 555, not 580: leaning swings the low corner ~34px below centre, and a hit
+  -- landing at full lean adds the recoil dip on top of that.
+  objects.paddle = Paddle(world, 400, 555)
   objects.ball = Ball(world, objects, 400, 550)
   objects.walls = Wall:createBounds(world, 800, 600)
   objects.bricks = Brick:createGrid(world, 10, 5, 80, 30)
@@ -68,17 +73,17 @@ function love.load()
         target:destroy()
       end
 
+      -- Walls and bricks are perfectly elastic, so they need no help -- the ball
+      -- keeps whatever energy it launched with. Only the paddle tops it back up,
+      -- and Ball:restoreEnergy does that as a floor rather than a per-bounce
+      -- multiplier, so returns cannot compound into a runaway.
       if
         hitter
         and class.isinstanceof(hitter, Ball)
         and target
-        and (class.isinstanceof(target, Paddle) or class.isinstanceof(target, Wall))
+        and class.isinstanceof(target, Paddle)
       then
-        local vx, vy = hitter.body:getLinearVelocity()
-        local mass = hitter.body:getMass()
-        local factor = 0.1
-
-        hitter.body:applyLinearImpulse(vx * factor * mass, vy * factor * mass)
+        hitter.returned = true
       end
     end
   end)
