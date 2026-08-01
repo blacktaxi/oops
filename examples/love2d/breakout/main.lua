@@ -23,7 +23,7 @@ end
 
 local function checkVictory()
   for _, b in ipairs(objects.bricks) do
-    if not b.destroyed then
+    if not b:cleared() then
       return false
     end
   end
@@ -57,24 +57,20 @@ function love.load()
   objects.paddle = Paddle(world, 400, 555)
   objects.ball = Ball(world, objects, 400, 550)
   objects.walls = Wall:createBounds(world, 800, 600)
-  objects.bricks = Brick:createGrid(world, 10, 5, 80, 30)
+  objects.pieces = {}
+  objects.bricks = Brick:createGrid(world, objects, 10, 5, 80, 30)
 
   game.started = false
 
-  world:setCallbacks(function(a, b, contact)
+  local function beginContact(a, b)
     local objA = a:getUserData()
     local objB = b:getUserData()
 
-    -- Brick destruction
     for _, pair in ipairs {
       { objA, objB },
       { objB, objA },
     } do
       local hitter, target = pair[1], pair[2]
-
-      if target and class.isinstanceof(target, Brick) then
-        target:destroy()
-      end
 
       -- Walls and bricks are perfectly elastic, so they need no help -- the ball
       -- keeps whatever energy it launched with. Only the paddle tops it back up,
@@ -89,7 +85,26 @@ function love.load()
         hitter.returned = true
       end
     end
-  end)
+  end
+
+  -- Bricks take damage from the real contact impulse rather than from a hit
+  -- count, which is why this hangs off postSolve: it is the only callback that
+  -- runs after the solver and knows what the collision actually cost. Any impact
+  -- counts, not just the ball's, so a falling brick can carry others down with it.
+  local function postSolve(a, b, contact, normalImpulse1, tangentImpulse1, normalImpulse2)
+    local impulse = normalImpulse1 + (normalImpulse2 or 0)
+    local objA, objB = a:getUserData(), b:getUserData()
+
+    if class.isinstanceof(objA, Brick) then
+      objA:absorb(impulse)
+    end
+
+    if class.isinstanceof(objB, Brick) then
+      objB:absorb(impulse)
+    end
+  end
+
+  world:setCallbacks(beginContact, nil, nil, postSolve)
 end
 
 function love.update(dt)
@@ -103,8 +118,21 @@ function love.update(dt)
     objects.ball:update(dt)
   end
 
+  -- Bricks cross their thresholds here rather than in the contact callback,
+  -- because dislodging and shattering create and destroy bodies, which Box2D
+  -- only permits outside the world step.
   for _, brick in ipairs(objects.bricks) do
     brick:update(dt)
+  end
+
+  -- Retire debris once it has left the field, or it accumulates for the whole game.
+  for i = #objects.pieces, 1, -1 do
+    local piece = objects.pieces[i]
+
+    if piece.body:getY() > love.graphics.getHeight() + 60 then
+      piece.body:destroy()
+      table.remove(objects.pieces, i)
+    end
   end
 
   -- Ball below screen
@@ -139,6 +167,12 @@ function love.draw()
   if objects.bricks then
     for _, b in ipairs(objects.bricks) do
       b:draw()
+    end
+  end
+
+  if objects.pieces then
+    for _, p in ipairs(objects.pieces) do
+      p:draw()
     end
   end
 

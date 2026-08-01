@@ -58,6 +58,13 @@ local Ball = class('Ball', PhysicsObject) {
     return math.sqrt(self:climbCost()) * self.headroom
   end,
 
+  -- Impulse a square-on strike at apexSpeed lands on a static body: an elastic
+  -- bounce reverses the ball, so the target takes 2*m*v. Bricks price their
+  -- damage thresholds against this, so one unit of damage is one such hit.
+  nominalImpulse = function(self)
+    return 2 * self.body:getMass() * self.apexSpeed
+  end,
+
   -- Total speed needed along (dx, dy), against two separate requirements.
   speedFor = function(self, dx, dy)
     local cost = self:climbCost()
